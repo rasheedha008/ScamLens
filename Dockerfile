@@ -2,29 +2,30 @@
 FROM maven:3.9.6-eclipse-temurin-17 AS builder
 WORKDIR /app
 
-# Copy pom.xml and download dependencies (cached layer)
+# Copy configuration and sources
 COPY pom.xml .
-RUN mvn dependency:go-offline -B
-
-# Copy source code and build package
 COPY src ./src
+
+# Build package skipping tests for fast deployment
 RUN mvn clean package -DskipTests=true
 
 # Runtime stage
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
-# Create non-root user for security
-RUN addgroup -S scamlens && adduser -S scamlens -G scamlens
+# Create data directory and non-root user with full ownership
+RUN mkdir -p /app/data && \
+    addgroup -S scamlens && \
+    adduser -S scamlens -G scamlens && \
+    chown -R scamlens:scamlens /app
+
+# Copy built artifact with ownership assigned
+COPY --from=builder --chown=scamlens:scamlens /app/target/scamlens-*.jar app.jar
+
+# Switch to non-root user
 USER scamlens
 
-# Create data directory for H2/cache
-RUN mkdir -p /app/data
-
-# Copy built artifact from builder
-COPY --from=builder /app/target/scamlens-*.jar app.jar
-
-# Render dynamic port binding and memory constraints for free tier (512MB)
+# Render dynamic port binding and memory constraints for free tier (512MB RAM)
 ENV PORT=8080
 ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -Dfile.encoding=UTF-8"
 
