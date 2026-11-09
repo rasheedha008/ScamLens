@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScamLens - Intelligent Scam Detection & Cybersecurity Analysis Platform</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <!-- Custom Cyber CSS -->
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+
+<!-- Navbar -->
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<!-- Hero Section -->
+<section class="py-5 my-lg-4 position-relative">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-7">
+                <div class="d-inline-flex align-items-center gap-2 px-3 py-1 mb-3 rounded-pill" style="background: rgba(0, 240, 255, 0.1); border: 1px solid rgba(0, 240, 255, 0.3);">
+                    <i class="fa-solid fa-bolt text-info"></i>
+                    <span class="small text-info fw-semibold">Next-Gen Heuristic Scam Detection Engine</span>
+                </div>
+                <h1 class="display-4 fw-bold text-white mb-3">
+                    Detect Scams Before <span style="background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">They Reach You.</span>
+                </h1>
+                <p class="lead text-info fw-semibold mb-2">Think Before You Click. Stay Ahead of Scams.</p>
+                <p class="text-secondary fs-5 mb-4">
+                    Analyze suspicious messages and URLs with ScamLens. Understand potential threats, identify warning signs, and make safer online decisions.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a th:href="@{/scanner}" class="btn btn-cyber px-4 py-3 fs-6">
+                        <i class="fa-solid fa-crosshairs me-1"></i> Scan a Message
+                    </a>
+                    <a th:href="@{/register}" sec:authorize="isAnonymous()" class="btn btn-cyber-outline px-4 py-3 fs-6">
+                        <i class="fa-solid fa-user-plus"></i> Get Started
+                    </a>
+                    <a th:href="@{/dashboard}" sec:authorize="isAuthenticated()" class="btn btn-cyber-outline px-4 py-3 fs-6">
+                        <i class="fa-solid fa-gauge-high"></i> Open Dashboard
+                    </a>
+                    <a th:href="@{/awareness}" class="btn btn-purple px-4 py-3 fs-6">
+                        <i class="fa-solid fa-book-bookmark"></i> Learn About Scams
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="cyber-card cyber-card-glow p-4">
+                    <div class="d-flex align-items-center justify-content-between mb-3 border-bottom border-secondary pb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="brand-icon"><i class="fa-solid fa-shield-virus"></i></span>
+                            <span class="fw-bold text-white">Live Threat Scanner</span>
+                        </div>
+                        <span class="badge-risk-critical"><i class="fa-solid fa-circle-exclamation me-1"></i> Threat Detected</span>
+                    </div>
+                    <div class="p-3 mb-3 rounded" style="background: rgba(0, 0, 0, 0.4); font-family: var(--font-mono); font-size: 0.85rem; border: 1px dashed rgba(239, 68, 68, 0.4);">
+                        <p class="text-danger mb-1 fw-bold"><i class="fa-solid fa-envelope me-1"></i> SMS Sample:</p>
+                        <p class="text-secondary mb-0">"Dear customer, your bank account has been locked. <span class="highlight-phrase">Share your OTP immediately</span> to verify at <span class="text-warning">http://bank.auth-login.xyz</span> within 24 hours."</p>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <div class="p-2 rounded bg-dark border border-secondary text-center">
+                                <small class="text-muted d-block">Risk Score</small>
+                                <span class="fs-4 fw-bold text-danger">90/100</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-2 rounded bg-dark border border-secondary text-center">
+                                <small class="text-muted d-block">Level</small>
+                                <span class="fs-5 fw-bold text-danger">CRITICAL</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="small text-secondary mb-2">
+                        <i class="fa-solid fa-triangle-exclamation text-warning me-1"></i> Identified Categories:
+                        <span class="category-tag">Phishing</span>
+                        <span class="category-tag">OTP Theft</span>
+                        <span class="category-tag">Suspicious URL</span>
+                    </div>
+                    <a th:href="@{/demo}" class="btn btn-outline-info w-100 btn-sm mt-2">
+                        <i class="fa-solid fa-flask-vial me-1"></i> Test 12 Real Samples in Demo Mode
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Three Major Innovations Section -->
+<section class="py-5" style="background: linear-gradient(180deg, rgba(10, 25, 47, 0.95), rgba(15, 23, 42, 0.95)); border-top: 1px solid var(--accent-cyan); border-bottom: 1px solid var(--border-color);">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="badge px-3 py-2 text-uppercase mb-2" style="background: rgba(0, 240, 255, 0.15); color: var(--accent-cyan); border: 1px solid var(--accent-cyan); letter-spacing: 1.5px; font-weight: 600;">
+                <i class="fa-solid fa-microchip me-1"></i> Core Architectural Breakthroughs
+            </span>
+            <h2 class="fw-bold text-white fs-1">Three Major Innovations of ScamLens</h2>
+            <p class="text-secondary mx-auto" style="max-width: 750px;">
+                Engineered from the ground up in pure Java Spring Boot to surpass legacy keyword matching and fragmented security tools.
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Innovation 1 -->
+            <div class="col-lg-4">
+                <div class="cyber-card h-100 p-4 position-relative" style="border-top: 3px solid var(--accent-cyan);">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="p-3 rounded-3" style="background: rgba(0, 240, 255, 0.15); color: var(--accent-cyan); font-size: 1.8rem;">
+                            <i class="fa-solid fa-brain"></i>
+                        </div>
+                        <div>
+                            <span class="badge bg-dark border border-secondary text-info mb-1">Innovation 1</span>
+                            <h4 class="text-white mb-0">Context-Aware Scam Detection</h4>
+                        </div>
+                    </div>
+                    <p class="text-secondary small mb-3">
+                        Analyzes semantic meaning and user intent rather than relying merely on isolated keywords. Differentiates between authentic banking warnings and hostile fraud requests.
+                    </p>
+                    <div class="p-3 rounded bg-dark border border-secondary mb-3 small">
+                        <div class="text-success mb-2">
+                            <i class="fa-solid fa-check-circle me-1"></i> <strong>Legitimate Advisory:</strong>
+                            <div class="text-muted fst-italic">"Bank will never ask for your OTP. Do not share credentials." &rarr; <span class="badge bg-success">Low Risk (5/100)</span></div>
+                        </div>
+                        <div class="text-danger">
+                            <i class="fa-solid fa-triangle-exclamation me-1"></i> <strong>Active Harvest Attack:</strong>
+                            <div class="text-muted fst-italic">"Your account is locked. Share OTP immediately to verify." &rarr; <span class="badge bg-danger">Critical (90/100)</span></div>
+                        </div>
+                    </div>
+                    <ul class="text-secondary small ps-3 mb-0">
+                        <li class="mb-1"><strong>Negation Detection:</strong> Detects 20+ protective warning prefixes ("never", "do not", "will not ask").</li>
+                        <li class="mb-1"><strong>Request-Intent Recognition:</strong> Isolates active credential harvesting directives.</li>
+                        <li><strong>Suspicious-Action Identification:</strong> Detects unverified calls, remote desktop software, and illicit APK directives.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Innovation 2 -->
+            <div class="col-lg-4">
+                <div class="cyber-card h-100 p-4 position-relative" style="border-top: 3px solid var(--accent-purple);">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="p-3 rounded-3" style="background: rgba(139, 92, 246, 0.15); color: var(--accent-purple); font-size: 1.8rem;">
+                            <i class="fa-solid fa-scale-balanced"></i>
+                        </div>
+                        <div>
+                            <span class="badge bg-dark border border-secondary text-purple mb-1" style="color: #c4b5fd;">Innovation 2</span>
+                            <h4 class="text-white mb-0">Explainable Multi-Indicator Scoring</h4>
+                        </div>
+                    </div>
+                    <p class="text-secondary small mb-3">
+                        Replaces opaque "black-box" outputs with an auditable, weighted multi-indicator risk assessment that scores threats transparently from 0 to 100.
+                    </p>
+                    <div class="p-3 rounded bg-dark border border-secondary mb-3 small">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-white"><i class="fa-solid fa-list-ol text-info me-1"></i> Weighted Heuristics:</span>
+                            <span class="text-info fw-bold">0 &ndash; 100 Scale</span>
+                        </div>
+                        <div class="progress mb-2" style="height: 6px; background-color: #334155;">
+                            <div class="progress-bar bg-info" role="progressbar" style="width: 75%"></div>
+                        </div>
+                        <div class="text-muted small">
+                            Every point is tied to verified indicators with category caps preventing runaway duplicate scoring.
+                        </div>
+                    </div>
+                    <ul class="text-secondary small ps-3 mb-0">
+                        <li class="mb-1"><strong>Weighted Scoring Matrix:</strong> Distinct weights assigned across 8 fraud categories.</li>
+                        <li class="mb-1"><strong>Transparent Threat Rationale:</strong> Clear cyber explanations for every extracted phrase and warning sign.</li>
+                        <li><strong>Explainable Risk Classification:</strong> Understand exactly why a message is rated Low, Medium, High, or Critical.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Innovation 3 -->
+            <div class="col-lg-4">
+                <div class="cyber-card h-100 p-4 position-relative" style="border-top: 3px solid #10b981;">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="p-3 rounded-3" style="background: rgba(16, 185, 129, 0.15); color: #10b981; font-size: 1.8rem;">
+                            <i class="fa-solid fa-cubes-stacked"></i>
+                        </div>
+                        <div>
+                            <span class="badge bg-dark border border-secondary text-success mb-1">Innovation 3</span>
+                            <h4 class="text-white mb-0">Integrated User-Centric Platform</h4>
+                        </div>
+                    </div>
+                    <p class="text-secondary small mb-3">
+                        Unifies message inspection, safe URL analysis, comparative analysis, personal history auditing, and cyber education under a single cybersecurity SaaS interface.
+                    </p>
+                    <div class="p-3 rounded bg-dark border border-secondary mb-3 small">
+                        <div class="row g-2 text-center">
+                            <div class="col-6">
+                                <div class="p-1 rounded bg-secondary bg-opacity-25 text-white">Message + URL</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-1 rounded bg-secondary bg-opacity-25 text-white">ScamLens Compare</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-1 rounded bg-secondary bg-opacity-25 text-white">Private History</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-1 rounded bg-secondary bg-opacity-25 text-white">OpenPDF Reports</div>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="text-secondary small ps-3 mb-0">
+                        <li class="mb-1"><strong>ScamLens Compare:</strong> Direct dual-message comparative risk differentiation.</li>
+                        <li class="mb-1"><strong>Personalized Audit Vault:</strong> Searchable user history with dynamic Chart.js metrics.</li>
+                        <li><strong>Scam Intelligence Center:</strong> 10 comprehensive cyber awareness modules with actionable defense protocols.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Message & URL Scanning Intro Section -->
+<section class="py-5" style="background: rgba(12, 22, 49, 0.5); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold text-white">Dual-Vector Cybersecurity Analysis</h2>
+            <p class="text-secondary">ScamLens inspects both textual semantic manipulation and deceptive digital link structures.</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="cyber-card h-100 p-4">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="p-3 rounded-3" style="background: rgba(0, 240, 255, 0.15); color: var(--accent-cyan); font-size: 1.5rem;">
+                            <i class="fa-solid fa-comment-sms"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-white mb-0">Context-Aware Message Scanning</h4>
+                            <small class="text-info">NLP & Semantic Meaning Engine</small>
+                        </div>
+                    </div>
+                    <p class="text-secondary">
+                        Our Java detection engine evaluates intent, grammatical negation, and contextual urgency instead of naive keyword matching. It understands that <em>"Never share your OTP"</em> is a safety advisory, while <em>"Share your OTP immediately"</em> is a critical threat.
+                    </p>
+                    <ul class="text-secondary small ps-3">
+                        <li class="mb-1">Covers SMS, WhatsApp, Email, and Social Media messages.</li>
+                        <li class="mb-1">Detects 7 threat categories including Job Scams and Financial Fraud.</li>
+                        <li>Extracts exact suspicious phrases with contextual explanations.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="cyber-card h-100 p-4">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="p-3 rounded-3" style="background: rgba(139, 92, 246, 0.15); color: var(--accent-purple); font-size: 1.5rem;">
+                            <i class="fa-solid fa-globe"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-white mb-0">Safe Passive URL Inspection</h4>
+                            <small class="text-purple" style="color: #c4b5fd;">Zero-Execution Deep Link Analysis</small>
+                        </div>
+                    </div>
+                    <p class="text-secondary">
+                        ScamLens uses Java's native <code>java.net.URI</code> and <code>java.net.IDN</code> parsing to analyze link architecture safely without ever executing code, downloading files, or visiting malicious servers.
+                    </p>
+                    <ul class="text-secondary small ps-3">
+                        <li class="mb-1">Unmasks URL shorteners (bit.ly, tinyurl, t.co, is.gd).</li>
+                        <li class="mb-1">Identifies direct IP hosts, suspicious userinfo (@ syntax), and Punycode.</li>
+                        <li>Flags excessive subdomains and brand impersonation in domain paths.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold text-white">How ScamLens Works</h2>
+            <p class="text-secondary">Comprehensive threat mitigation in three straightforward steps.</p>
+        </div>
+        <div class="row g-4 text-center">
+            <div class="col-md-4">
+                <div class="cyber-card p-4 h-100">
+                    <div class="score-circle mb-3" style="border-color: var(--accent-cyan); color: var(--accent-cyan); width: 80px; height: 80px;">
+                        <span class="fs-3 fw-bold">1</span>
+                    </div>
+                    <h5 class="text-white mb-2">Paste Content</h5>
+                    <p class="text-secondary small">
+                        Paste suspicious SMS, email, WhatsApp messages, or links into the message scanner. Supports up to 10,000 characters.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="cyber-card p-4 h-100">
+                    <div class="score-circle mb-3" style="border-color: var(--accent-purple); color: var(--accent-purple); width: 80px; height: 80px;">
+                        <span class="fs-3 fw-bold">2</span>
+                    </div>
+                    <h5 class="text-white mb-2">Java Engine Analysis</h5>
+                    <p class="text-secondary small">
+                        Our Spring Boot backend executes semantic rule evaluation, link decomposition, and weighted multi-factor risk scoring.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="cyber-card p-4 h-100">
+                    <div class="score-circle mb-3" style="border-color: var(--risk-low); color: var(--risk-low); width: 80px; height: 80px;">
+                        <span class="fs-3 fw-bold">3</span>
+                    </div>
+                    <h5 class="text-white mb-2">Review & Act</h5>
+                    <p class="text-secondary small">
+                        Inspect the 0–100 risk score, category breakdown, threat explanations, actionable safety advice, or download a formal PDF report.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Key Platform Features -->
+<section class="py-5" style="background: rgba(12, 22, 49, 0.4); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold text-white">Platform Capabilities</h2>
+            <p class="text-secondary">Engineered specifically for personal cybersecurity and fraud prevention.</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="cyber-card p-4 h-100">
+                    <i class="fa-solid fa-code-compare fs-3 text-info mb-3"></i>
+                    <h5 class="text-white">ScamLens Compare</h5>
+                    <p class="text-secondary small">Input two distinct messages simultaneously to contrast their threat levels, key differences, and URL structures side by side.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="cyber-card p-4 h-100">
+                    <i class="fa-solid fa-chart-pie fs-3 text-purple mb-3" style="color: var(--accent-purple);"></i>
+                    <h5 class="text-white">Dynamic Analytics Dashboard</h5>
+                    <p class="text-secondary small">Interactive Chart.js visualizations derived from your private database scan records, risk distributions, and security insights.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="cyber-card p-4 h-100">
+                    <i class="fa-solid fa-file-pdf fs-3 text-danger mb-3"></i>
+                    <h5 class="text-white">Downloadable PDF Reports</h5>
+                    <p class="text-secondary small">Generate formal cybersecurity incident reports with OpenPDF in pure Java. Ideal for archiving or reporting to authorities.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="cyber-card p-4 h-100">
+                    <i class="fa-solid fa-lock fs-3 text-warning mb-3"></i>
+                    <h5 class="text-white">User Privacy & Authorization</h5>
+                    <p class="text-secondary small">Protected by Spring Security with BCrypt hashing and strict ownership checks. Scan histories remain completely private.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="cyber-card p-4 h-100">
+                    <i class="fa-solid fa-graduation-cap fs-3 text-success mb-3"></i>
+                    <h5 class="text-white">Scam Intelligence Center</h5>
+                    <p class="text-secondary small">10 detailed educational modules covering phishing, OTP harvesting, fake jobs, payment fraud, and essential digital safety habits.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="cyber-card p-4 h-100">
+                    <i class="fa-solid fa-flask fs-3 text-info mb-3"></i>
+                    <h5 class="text-white">12-Sample Demo Suite</h5>
+                    <p class="text-secondary small">Evaluate real-world examples across 8 scam categories and normal messages, all evaluated dynamically by the Java backend.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Cybersecurity Statistics Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="cyber-card p-5 text-center" style="background: linear-gradient(135deg, rgba(12, 22, 49, 0.9), rgba(15, 23, 42, 0.9)); border: 1px solid var(--accent-cyan);">
+            <h2 class="fw-bold text-white mb-2">Why Proactive Verification Matters</h2>
+            <p class="text-secondary mb-4">Cybercrime damages exceed billions annually through deceptive social engineering.</p>
+            <div class="row g-4 text-center">
+                <div class="col-md-3 col-6">
+                    <h2 class="fw-bold text-info mb-0">3.4B+</h2>
+                    <small class="text-muted">Phishing Emails Sent Daily Globally</small>
+                </div>
+                <div class="col-md-3 col-6">
+                    <h2 class="fw-bold text-purple mb-0" style="color: var(--accent-purple);">82%</h2>
+                    <small class="text-muted">Breaches Involving Human Vulnerability</small>
+                </div>
+                <div class="col-md-3 col-6">
+                    <h2 class="fw-bold text-warning mb-0">65%</h2>
+                    <small class="text-muted">Scams Involving Coercive Urgency</small>
+                </div>
+                <div class="col-md-3 col-6">
+                    <h2 class="fw-bold text-danger mb-0">10,000+</h2>
+                    <small class="text-muted">Fake Job & Lottery Portals Created Weekly</small>
+                </div>
+            </div>
+            <div class="mt-4 pt-3 border-top border-secondary">
+                <a th:href="@{/scanner}" class="btn btn-cyber px-4 py-2 me-2">Scan Now</a>
+                <a th:href="@{/awareness}" class="btn btn-cyber-outline px-4 py-2">Explore Intelligence Center</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<!-- Bootstrap 5 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>

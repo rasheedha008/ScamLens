@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - ScamLens Security Analytics</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container py-4 my-2">
+    <!-- Header Greeting -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 border-bottom border-secondary pb-3">
+        <div>
+            <h2 class="text-white fw-bold mb-1">
+                <i class="fa-solid fa-gauge-high text-info me-2"></i> Security Dashboard
+            </h2>
+            <p class="text-secondary small mb-0">
+                Welcome back, <strong class="text-white" th:text="${user.name}">User</strong> (<span th:text="${user.email}">user@email.com</span>)
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <a th:href="@{/scanner}" class="btn btn-cyber">
+                <i class="fa-solid fa-crosshairs me-1"></i> New Scan
+            </a>
+            <a th:href="@{/compare}" class="btn btn-cyber-outline">
+                <i class="fa-solid fa-code-compare me-1"></i> Compare
+            </a>
+        </div>
+    </div>
+
+    <!-- 5 Key Metrics Cards -->
+    <div class="row g-3 mb-4">
+        <!-- Metric 1: Total Scans -->
+        <div class="col-lg col-md-4 col-6">
+            <div class="cyber-card p-3 text-center h-100">
+                <div class="d-flex justify-content-between align-items-center text-muted mb-2">
+                    <small class="fw-semibold">Total Scans</small>
+                    <i class="fa-solid fa-magnifying-glass-chart text-info"></i>
+                </div>
+                <h3 class="fw-bold text-white mb-0" th:text="${stats.totalScans}">0</h3>
+                <small class="text-muted" style="font-size: 0.75rem;">Lifetime records</small>
+            </div>
+        </div>
+
+        <!-- Metric 2: Critical Scans -->
+        <div class="col-lg col-md-4 col-6">
+            <div class="cyber-card p-3 text-center h-100" style="border-left: 4px solid var(--risk-critical);">
+                <div class="d-flex justify-content-between align-items-center text-muted mb-2">
+                    <small class="fw-semibold">Critical Threat</small>
+                    <i class="fa-solid fa-skull-crossbones text-danger"></i>
+                </div>
+                <h3 class="fw-bold text-danger mb-0" th:text="${stats.criticalRiskScans}">0</h3>
+                <small class="text-muted" style="font-size: 0.75rem;">Score 75–100</small>
+            </div>
+        </div>
+
+        <!-- Metric 3: High Risk -->
+        <div class="col-lg col-md-4 col-6">
+            <div class="cyber-card p-3 text-center h-100" style="border-left: 4px solid var(--risk-high);">
+                <div class="d-flex justify-content-between align-items-center text-muted mb-2">
+                    <small class="fw-semibold">High Risk</small>
+                    <i class="fa-solid fa-triangle-exclamation text-warning"></i>
+                </div>
+                <h3 class="fw-bold text-warning mb-0" th:text="${stats.highRiskScans}">0</h3>
+                <small class="text-muted" style="font-size: 0.75rem;">Score 50–74</small>
+            </div>
+        </div>
+
+        <!-- Metric 4: Medium Risk -->
+        <div class="col-lg col-md-6 col-6">
+            <div class="cyber-card p-3 text-center h-100" style="border-left: 4px solid var(--risk-medium);">
+                <div class="d-flex justify-content-between align-items-center text-muted mb-2">
+                    <small class="fw-semibold">Medium Risk</small>
+                    <i class="fa-solid fa-shield-halved text-warning"></i>
+                </div>
+                <h3 class="fw-bold text-warning mb-0" th:text="${stats.mediumRiskScans}">0</h3>
+                <small class="text-muted" style="font-size: 0.75rem;">Score 25–49</small>
+            </div>
+        </div>
+
+        <!-- Metric 5: Average Risk Score -->
+        <div class="col-lg col-md-6 col-12">
+            <div class="cyber-card p-3 text-center h-100" style="border-left: 4px solid var(--accent-cyan);">
+                <div class="d-flex justify-content-between align-items-center text-muted mb-2">
+                    <small class="fw-semibold">Avg Risk Score</small>
+                    <i class="fa-solid fa-chart-line text-info"></i>
+                </div>
+                <h3 class="fw-bold text-info mb-0" th:text="${stats.averageRiskScore} + '/100'">0/100</h3>
+                <small class="text-muted" style="font-size: 0.75rem;">Database heuristic mean</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts & Quick Action Row -->
+    <div class="row g-4 mb-4">
+        <!-- Chart: Risk Distribution -->
+        <div class="col-lg-6">
+            <div class="cyber-card p-4 h-100">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="text-white mb-0"><i class="fa-solid fa-chart-pie text-info me-2"></i> Risk Level Breakdown</h5>
+                    <span class="badge bg-dark text-muted border border-secondary">Dynamic Database</span>
+                </div>
+                <div style="position: relative; height: 260px;">
+                    <canvas id="riskDistributionChart"></canvas>
+                </div>
+                <div class="d-flex justify-content-center gap-3 mt-3 small text-secondary">
+                    <span><i class="fa-solid fa-circle text-success me-1"></i> Low: <strong th:text="${stats.lowRiskScans}">0</strong></span>
+                    <span><i class="fa-solid fa-circle text-warning me-1"></i> Med: <strong th:text="${stats.mediumRiskScans}">0</strong></span>
+                    <span><i class="fa-solid fa-circle text-warning me-1" style="color: #f97316 !important;"></i> High: <strong th:text="${stats.highRiskScans}">0</strong></span>
+                    <span><i class="fa-solid fa-circle text-danger me-1"></i> Critical: <strong th:text="${stats.criticalRiskScans}">0</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart: Category Breakdown & Quick Scan -->
+        <div class="col-lg-6">
+            <div class="cyber-card p-4 h-100">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="text-white mb-0"><i class="fa-solid fa-chart-column text-purple me-2" style="color: var(--accent-purple);"></i> Threat Categories Encountered</h5>
+                    <span class="badge bg-dark text-muted border border-secondary">Top Types</span>
+                </div>
+                <div style="position: relative; height: 260px;">
+                    <canvas id="categoryDistributionChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Insights & Recent Scans Row -->
+    <div class="row g-4">
+        <!-- Security Insights -->
+        <div class="col-lg-4">
+            <div class="cyber-card p-4 h-100">
+                <h5 class="text-white mb-3"><i class="fa-solid fa-lightbulb text-warning me-2"></i> Security Insights</h5>
+                <div class="d-flex flex-column gap-3">
+                    <div th:each="insight : ${stats.securityInsights}" class="p-3 rounded bg-dark border border-secondary small">
+                        <i class="fa-solid fa-shield-virus text-info me-2"></i>
+                        <span class="text-secondary" th:text="${insight}">Security insight details</span>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-top border-secondary">
+                    <h6 class="text-white small fw-bold mb-2">Need advice on a message?</h6>
+                    <a th:href="@{/awareness}" class="btn btn-purple btn-sm w-100">
+                        <i class="fa-solid fa-book-bookmark me-1"></i> Read 10 Scam Safety Guides
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Scan Activity Table -->
+        <div class="col-lg-8">
+            <div class="cyber-card p-4 h-100">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="text-white mb-0"><i class="fa-solid fa-clock-rotate-left text-info me-2"></i> Recent Scan Activity</h5>
+                    <a th:href="@{/history}" class="btn btn-sm btn-outline-info">View All History</a>
+                </div>
+
+                <div th:if="${#lists.isEmpty(stats.recentScans)}" class="text-center py-5 text-muted">
+                    <i class="fa-solid fa-inbox fs-1 mb-2 d-block"></i>
+                    <p class="mb-2">No scans registered in your account yet.</p>
+                    <a th:href="@{/scanner}" class="btn btn-cyber btn-sm">Perform First Scan</a>
+                </div>
+
+                <div th:if="${!#lists.isEmpty(stats.recentScans)}" class="table-responsive">
+                    <table class="table table-cyber align-middle">
+                        <thead>
+                            <tr>
+                                <th>Scan ID</th>
+                                <th>Source</th>
+                                <th>Snippet</th>
+                                <th>Category</th>
+                                <th>Score</th>
+                                <th>Level</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="scan : ${stats.recentScans}">
+                                <td><span class="font-monospace text-info" th:text="'#' + ${scan.id}">#1</span></td>
+                                <td>
+                                    <span class="badge bg-dark border border-secondary" th:text="${scan.sourceType}">SMS</span>
+                                </td>
+                                <td>
+                                    <span class="small text-secondary" style="max-width: 180px; display: inline-block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" th:text="${scan.originalMessage}">Message snippet...</span>
+                                </td>
+                                <td>
+                                    <span class="small text-white" th:text="${#strings.listJoin(scan.categories, ', ')}">Phishing</span>
+                                </td>
+                                <td>
+                                    <span class="fw-bold" th:classappend="${scan.riskScore >= 75 ? 'text-danger' : (scan.riskScore >= 50 ? 'text-warning' : (scan.riskScore >= 25 ? 'text-warning' : 'text-success'))}" th:text="${scan.riskScore} + '/100'">0/100</span>
+                                </td>
+                                <td>
+                                    <span th:class="${scan.riskLevel == 'Critical' ? 'badge-risk-critical' : (scan.riskLevel == 'High' ? 'badge-risk-high' : (scan.riskLevel == 'Medium' ? 'badge-risk-medium' : 'badge-risk-low'))}" th:text="${scan.riskLevel}">Low</span>
+                                </td>
+                                <td>
+                                    <a th:href="@{'/result/' + ${scan.id}}" class="btn btn-sm btn-outline-info" title="View Detailed Report">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<!-- Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/main.js}"></script>
+
+<!-- Dynamic Chart.js Script strictly populated from DB statistics -->
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+        const riskDistData = /*[[${stats.riskDistribution}]]*/ { "Low": 0, "Medium": 0, "High": 0, "Critical": 0 };
+        const catDistData = /*[[${stats.categoryDistribution}]]*/ {};
+
+        // 1. Risk Level Chart (Doughnut)
+        const ctxRisk = document.getElementById('riskDistributionChart');
+        if (ctxRisk) {
+            new Chart(ctxRisk, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(riskDistData),
+                    datasets: [{
+                        data: Object.values(riskDistData),
+                        backgroundColor: ['#10b981', '#eab308', '#f97316', '#ef4444'],
+                        borderColor: '#0c1631',
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        // 2. Category Distribution Chart (Bar)
+        const ctxCat = document.getElementById('categoryDistributionChart');
+        if (ctxCat) {
+            const catLabels = Object.keys(catDistData);
+            const catValues = Object.values(catDistData);
+
+            if (catLabels.length === 0) {
+                catLabels.push("No Categories Yet");
+                catValues.push(0);
+            }
+
+            new Chart(ctxCat, {
+                type: 'bar',
+                data: {
+                    labels: catLabels,
+                    datasets: [{
+                        label: 'Threat Count',
+                        data: catValues,
+                        backgroundColor: 'rgba(139, 92, 246, 0.7)',
+                        borderColor: '#8b5cf6',
+                        borderWidth: 1,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { precision: 0, color: '#94a3b8' },
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                        },
+                        x: {
+                            ticks: { color: '#94a3b8', font: { size: 10 } },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+</body>
+</html>

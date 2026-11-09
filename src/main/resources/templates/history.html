@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan History - ScamLens Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container py-4 my-2">
+    <!-- Header -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 border-bottom border-secondary pb-3">
+        <div>
+            <h2 class="text-white fw-bold mb-1">
+                <i class="fa-solid fa-clock-rotate-left text-info me-2"></i> Private Scan History
+            </h2>
+            <p class="text-secondary small mb-0">Records securely isolated and authorized to your account (<span th:text="${user.email}">user@email.com</span>).</p>
+        </div>
+        <div>
+            <a th:href="@{/scanner}" class="btn btn-cyber">
+                <i class="fa-solid fa-plus me-1"></i> New Analysis
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter and Search Controls -->
+    <div class="cyber-card p-3 mb-4">
+        <div class="row g-3 align-items-center">
+            <div class="col-md-3">
+                <div class="input-group">
+                    <span class="input-group-text bg-dark border-secondary text-info"><i class="fa-solid fa-search"></i></span>
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search message content / தேடு..." oninput="filterHistory()">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <select id="languageFilter" class="form-select" onchange="filterHistory()">
+                    <option value="">All Languages / மொழிகள்</option>
+                    <option value="tamil">தமிழ் (Tamil)</option>
+                    <option value="english">English</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select id="riskFilter" class="form-select" onchange="filterHistory()">
+                    <option value="">All Risk Levels</option>
+                    <option value="Critical">Critical (75–100)</option>
+                    <option value="High">High (50–74)</option>
+                    <option value="Medium">Medium (25–49)</option>
+                    <option value="Low">Low (0–24)</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select id="categoryFilter" class="form-select" onchange="filterHistory()">
+                    <option value="">All Scam Categories / பிரிவுகள்</option>
+                    <optgroup label="English Categories">
+                        <option value="Banking Fraud">Banking Fraud</option>
+                        <option value="OTP and Credential Theft">OTP Theft</option>
+                        <option value="Password Theft">Password Theft</option>
+                        <option value="Phishing">Phishing / Suspicious URL</option>
+                        <option value="Payment Scams">Payment Scams / Financial Fraud</option>
+                        <option value="Prize and Lottery Scams">Prize & Lottery</option>
+                        <option value="Fake Job Offers">Fake Job Offers</option>
+                        <option value="Fake Loan Offers">Fake Loan Offers</option>
+                        <option value="KYC Phishing">KYC Phishing</option>
+                        <option value="Electricity Payment Scams">Electricity Payment Scams</option>
+                        <option value="Government Impersonation">Government Impersonation</option>
+                        <option value="Fake Customer Support">Fake Customer Support</option>
+                        <option value="Personal Information Theft">Personal Info Theft</option>
+                        <option value="Investment Scams">Investment Scams</option>
+                        <option value="Threat-based Scams">Threat-based Scams</option>
+                        <option value="Legitimate Security Advisory">Legitimate Security Advisory</option>
+                    </optgroup>
+                    <optgroup label="தமிழ் மோசடி வகைகள் (Tamil Categories)">
+                        <option value="வங்கி மோசடி">வங்கி மோசடி (Banking Fraud)</option>
+                        <option value="OTP மோசடி">OTP மோசடி (OTP Theft)</option>
+                        <option value="கடவுச்சொல் திருட்டு">கடவுச்சொல் திருட்டு (Password Theft)</option>
+                        <option value="போலியான வேலை வாய்ப்பு">போலியான வேலை வாய்ப்பு (Fake Job)</option>
+                        <option value="பரிசு மற்றும் லாட்டரி மோசடி">பரிசு மற்றும் லாட்டரி மோசடி (Prize/Lottery)</option>
+                        <option value="போலியான கடன் சலுகைகள்">போலியான கடன் சலுகைகள் (Fake Loans)</option>
+                        <option value="KYC புதுப்பிப்பு மோசடி">KYC புதுப்பிப்பு மோசடி (KYC Phishing)</option>
+                        <option value="மின்சாரக் கட்டண மோசடி">மின்சாரக் கட்டண மோசடி (Electricity Scam)</option>
+                        <option value="போலியான அரசு அறிவிப்புகள்">போலியான அரசு அறிவிப்புகள் (Govt Impersonation)</option>
+                        <option value="போலியான வாடிக்கையாளர் சேவை">போலியான வாடிக்கையாளர் சேவை (Fake Support)</option>
+                        <option value="பணப்பரிமாற்ற மோசடி">பணப்பரிமாற்ற மோசடி (Payment Scams)</option>
+                        <option value="இணையதள இணைப்பு மோசடி">இணையதள இணைப்பு மோசடி (Phishing URL)</option>
+                        <option value="தனிப்பட்ட தகவல் திருட்டு">தனிப்பட்ட தகவல் திருட்டு (Identity Theft)</option>
+                        <option value="போலியான பரிசுப் போட்டிகள்">போலியான பரிசுப் போட்டிகள் (Fake Contests)</option>
+                        <option value="முதலீட்டு மோசடி">முதலீட்டு மோசடி (Investment Scams)</option>
+                        <option value="மிரட்டல் மற்றும் அவசரச் செய்திகள்">மிரட்டல் மற்றும் அவசரச் செய்திகள் (Threat/Urgency)</option>
+                        <option value="சட்டபூர்வ பாதுகாப்பு எச்சரிக்கை">சட்டபூர்வ பாதுகாப்பு எச்சரிக்கை (Security Advisory)</option>
+                    </optgroup>
+                </select>
+            </div>
+            <div class="col-md-2 text-md-end">
+                <button type="button" class="btn btn-outline-secondary w-100" onclick="resetFilters()">
+                    <i class="fa-solid fa-rotate-left me-1"></i> Reset
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Box for Deletion -->
+    <div id="historyAlertBox"></div>
+
+    <!-- Scans Table Card -->
+    <div class="cyber-card p-4">
+        <div th:if="${#lists.isEmpty(scans)}" id="emptyHistoryNotice" class="text-center py-5 text-muted">
+            <i class="fa-solid fa-folder-open fs-1 mb-3 d-block text-secondary"></i>
+            <h5 class="text-white">No Scan Records Found</h5>
+            <p class="small text-secondary mb-3">You haven't scanned any messages or links yet.</p>
+            <a th:href="@{/scanner}" class="btn btn-cyber">Scan a Message Now</a>
+        </div>
+
+        <div th:if="${!#lists.isEmpty(scans)}" class="table-responsive" id="historyTableContainer">
+            <table class="table table-cyber align-middle" id="historyTable">
+                <thead>
+                    <tr>
+                        <th>Scan ID</th>
+                        <th>Date & Time</th>
+                        <th>Language</th>
+                        <th>Source</th>
+                        <th>Content Snippet</th>
+                        <th>Categories</th>
+                        <th>Score</th>
+                        <th>Risk Level</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="historyTbody">
+                    <tr th:each="scan : ${scans}" th:id="'scanRow-' + ${scan.id}"
+                        th:data-level="${scan.riskLevel}"
+                        th:data-language="${scan.detectedLanguage != null ? scan.detectedLanguage : 'English'}"
+                        th:data-category="${(scan.categories != null ? #strings.listJoin(scan.categories, ' ') : '') + ' ' + (scan.categoriesTa != null ? #strings.listJoin(scan.categoriesTa, ' ') : '')}"
+                        th:data-text="${scan.originalMessage}">
+                        <td><span class="font-monospace text-info fw-bold" th:text="'#' + ${scan.id}">#1</span></td>
+                        <td>
+                            <small class="text-secondary" th:text="${#temporals.format(scan.createdAt, 'yyyy-MM-dd HH:mm')}">2026-11-06</small>
+                        </td>
+                        <td>
+                            <span th:if="${scan.detectedLanguage != null and #strings.contains(scan.detectedLanguage, 'Tamil')}" 
+                                  class="badge bg-warning bg-opacity-25 text-warning border border-warning border-opacity-50">
+                                <i class="fa-solid fa-language me-1"></i>தமிழ்
+                            </span>
+                            <span th:unless="${scan.detectedLanguage != null and #strings.contains(scan.detectedLanguage, 'Tamil')}" 
+                                  class="badge bg-info bg-opacity-25 text-info border border-info border-opacity-50">
+                                <i class="fa-solid fa-globe me-1"></i>English
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-dark border border-secondary" th:text="${scan.sourceType}">SMS</span>
+                        </td>
+                        <td>
+                            <span class="small text-secondary" style="max-width: 220px; display: inline-block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" th:text="${scan.originalMessage}" th:title="${scan.originalMessage}">Message content</span>
+                        </td>
+                        <td>
+                            <div>
+                                <span class="small text-white fw-semibold" th:text="${scan.categories != null and !scan.categories.isEmpty() ? #strings.listJoin(scan.categories, ', ') : (scan.categoriesTa != null and !scan.categoriesTa.isEmpty() ? #strings.listJoin(scan.categoriesTa, ', ') : 'None')}">Phishing</span>
+                                <div th:if="${scan.categoriesTa != null and !scan.categoriesTa.isEmpty()}" class="small text-info opacity-75" style="font-size: 0.78rem;" th:text="${#strings.listJoin(scan.categoriesTa, ', ')}">வங்கி மோசடி</div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="fw-bold" 
+                                  th:classappend="${scan.riskScore >= 75 ? 'text-danger' : (scan.riskScore >= 50 ? 'text-warning' : (scan.riskScore >= 25 ? 'text-warning' : 'text-success'))}" 
+                                  th:text="${scan.riskScore} + '/100'">0/100</span>
+                        </td>
+                        <td>
+                            <span th:class="${scan.riskLevel == 'Critical' ? 'badge-risk-critical' : (scan.riskLevel == 'High' ? 'badge-risk-high' : (scan.riskLevel == 'Medium' ? 'badge-risk-medium' : 'badge-risk-low'))}" th:text="${scan.riskLevel}">Low</span>
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a th:href="@{'/result/' + ${scan.id}}" class="btn btn-outline-info" title="View Full Report">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                                <a th:href="@{'/api/report/' + ${scan.id} + '/pdf'}" class="btn btn-outline-danger" title="Download PDF Report" target="_blank">
+                                    <i class="fa-solid fa-file-pdf"></i>
+                                </a>
+                                <button type="button" class="btn btn-outline-secondary" title="Delete Record" th:onclick="'deleteScan(' + ${scan.id} + ')'">
+                                    <i class="fa-solid fa-trash text-danger"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/main.js}"></script>
+
+<script>
+    function filterHistory() {
+        const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
+        const level = document.getElementById('riskFilter').value.toLowerCase();
+        const category = document.getElementById('categoryFilter').value.toLowerCase();
+        const language = (document.getElementById('languageFilter') ? document.getElementById('languageFilter').value.toLowerCase() : '');
+
+        const rows = document.querySelectorAll('#historyTbody tr');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const rowText = (row.getAttribute('data-text') || '').toLowerCase();
+            const rowLevel = (row.getAttribute('data-level') || '').toLowerCase();
+            const rowCat = (row.getAttribute('data-category') || '').toLowerCase();
+            const rowLang = (row.getAttribute('data-language') || '').toLowerCase();
+
+            const matchesText = !keyword || rowText.includes(keyword) || rowCat.includes(keyword);
+            const matchesLevel = !level || rowLevel === level;
+            const matchesCat = !category || rowCat.includes(category);
+            const matchesLang = !language || rowLang.includes(language);
+
+            if (matchesText && matchesLevel && matchesCat && matchesLang) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    function resetFilters() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('riskFilter').value = '';
+        document.getElementById('categoryFilter').value = '';
+        if (document.getElementById('languageFilter')) {
+            document.getElementById('languageFilter').value = '';
+        }
+        filterHistory();
+    }
+
+    async function deleteScan(id) {
+        if (!confirm(`Are you sure you want to delete Scan #${id}? This action cannot be undone.`)) {
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/history/${id}`, {
+                method: 'DELETE'
+            });
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                const row = document.getElementById(`scanRow-${id}`);
+                if (row) {
+                    row.remove();
+                }
+                ScamLens.showAlert('historyAlertBox', `Scan #${id} was deleted successfully.`, 'success');
+            } else {
+                ScamLens.showAlert('historyAlertBox', data.message || 'Failed to delete scan record.', 'danger');
+            }
+        } catch (err) {
+            ScamLens.showAlert('historyAlertBox', 'Network error while attempting deletion.', 'danger');
+        }
+    }
+</script>
+</body>
+</html>

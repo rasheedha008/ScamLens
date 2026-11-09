@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<footer th:fragment="footer" class="footer-custom">
+    <div class="container">
+        <div class="row g-4 mb-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <span class="brand-icon"><i class="fa-solid fa-shield-halved"></i></span>
+                    <span class="h5 mb-0 text-white fw-bold">Scam<span style="color: var(--accent-cyan);">Lens</span></span>
+                </div>
+                <p class="small text-secondary fw-semibold mb-2">
+                    Think Before You Click. Stay Ahead of Scams.
+                </p>
+                <p class="small text-secondary mb-0">
+                    ScamLens is an intelligent cybersecurity analysis platform engineering context-aware threat detection, passive URL risk scoring, and educational scam intelligence.
+                </p>
+            </div>
+            <div class="col-lg-2 col-md-6 col-6">
+                <h6 class="text-white fw-bold mb-3">Platform</h6>
+                <ul class="list-unstyled small">
+                    <li class="mb-2"><a th:href="@{/scanner}" class="footer-link">Scanner</a></li>
+                    <li class="mb-2"><a th:href="@{/compare}" class="footer-link">Compare</a></li>
+                    <li class="mb-2"><a th:href="@{/dashboard}" class="footer-link">Dashboard</a></li>
+                    <li class="mb-2"><a th:href="@{/history}" class="footer-link">History</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-2 col-md-6 col-6">
+                <h6 class="text-white fw-bold mb-3">Education</h6>
+                <ul class="list-unstyled small">
+                    <li class="mb-2"><a th:href="@{/awareness}" class="footer-link">Intelligence Center</a></li>
+                    <li class="mb-2"><a th:href="@{/awareness#phishing}" class="footer-link">Phishing Threats</a></li>
+                    <li class="mb-2"><a th:href="@{/awareness#otp-scams}" class="footer-link">OTP Theft Prevention</a></li>
+                    <li class="mb-2"><a th:href="@{/about}" class="footer-link">About ScamLens</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <h6 class="text-white fw-bold mb-3">Safety Notice</h6>
+                <p class="small text-secondary mb-0">
+                    ScamLens risk scores are heuristic algorithmic indicators designed to detect threat patterns. They do not constitute legal certainty. Never interact with unverified links or share authentication codes.
+                </p>
+            </div>
+        </div>
+        <div class="border-top border-secondary pt-3 text-center small text-secondary">
+            <p class="mb-0 text-secondary">&copy; <span th:text="${#calendars.format(#calendars.createNow(), 'yyyy')}">2026</span> ScamLens Platform. All rights reserved. Engineering safer digital communication.</p>
+        </div>
+    </div>
+</footer>
+</body>
+</html>

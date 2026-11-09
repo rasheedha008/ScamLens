@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScamLens Compare - Dual Message Threat Analysis</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container py-4 my-2">
+    <!-- Header -->
+    <div class="text-center mb-4">
+        <h2 class="text-white fw-bold mb-2">
+            <i class="fa-solid fa-code-compare text-info me-2"></i> ScamLens Compare
+        </h2>
+        <p class="text-secondary">Input two distinct messages or URLs to evaluate risk differentials, category variations, and comparative indicators.</p>
+    </div>
+
+    <!-- Dual Input Forms Card -->
+    <div class="cyber-card cyber-card-glow p-4 mb-4">
+        <form id="compareForm" onsubmit="event.preventDefault(); executeComparison();">
+            <div class="row g-4 mb-3">
+                <!-- Message A -->
+                <div class="col-lg-6">
+                    <div class="p-3 rounded bg-dark border border-secondary h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-primary text-white"><i class="fa-solid fa-font me-1"></i> Message A</span>
+                            <select id="sourceA" class="form-select form-select-sm w-auto">
+                                <option value="Auto Detect" selected>Auto Detect</option>
+                                <option value="SMS">SMS</option>
+                                <option value="WhatsApp">WhatsApp</option>
+                                <option value="Email">Email</option>
+                                <option value="Social Media">Social Media</option>
+                            </select>
+                        </div>
+                        <textarea id="textA" class="form-control font-monospace" rows="6" 
+                                  placeholder="Enter first message to compare (e.g., 'Share your OTP immediately to verify account at http://...')"></textarea>
+                    </div>
+                </div>
+
+                <!-- Message B -->
+                <div class="col-lg-6">
+                    <div class="p-3 rounded bg-dark border border-secondary h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-purple text-white" style="background-color: var(--accent-purple);"><i class="fa-solid fa-bold me-1"></i> Message B</span>
+                            <select id="sourceB" class="form-select form-select-sm w-auto">
+                                <option value="Auto Detect" selected>Auto Detect</option>
+                                <option value="SMS">SMS</option>
+                                <option value="WhatsApp">WhatsApp</option>
+                                <option value="Email">Email</option>
+                                <option value="Social Media">Social Media</option>
+                            </select>
+                        </div>
+                        <textarea id="textB" class="form-control font-monospace" rows="6" 
+                                  placeholder="Enter second message to compare (e.g., 'Never share your OTP with anyone. Bank will never ask for credentials.')"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alerts -->
+            <div id="compareAlertBox"></div>
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <button type="submit" id="compareBtn" class="btn btn-cyber px-4 py-2">
+                    <i class="fa-solid fa-bolt me-1"></i> Run Side-by-Side Comparison
+                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="loadSampleComparison()">
+                    <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Load Sample Comparison (Scam vs Warning)
+                </button>
+            </div>
+        </form>
+
+        <!-- Loading -->
+        <div id="compareLoading" class="text-center py-5 d-none">
+            <div class="spinner-border text-info mb-3" role="status"></div>
+            <h5 class="text-white">Analyzing Dual Message Vectors...</h5>
+        </div>
+    </div>
+
+    <!-- Comparison Results View -->
+    <div id="compareResultContainer" class="d-none">
+        <!-- Higher Risk Verdict Banner -->
+        <div class="cyber-card p-4 mb-4" id="verdictBanner">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div>
+                    <span class="small text-secondary fw-semibold text-uppercase letter-spacing-1">Comparative Verdict</span>
+                    <h3 class="text-white fw-bold mb-1" id="higherRiskText">Message A has Higher Risk</h3>
+                    <p class="text-secondary small mb-0" id="diffDescription">Score difference: 85 points.</p>
+                </div>
+                <div class="alert alert-warning py-2 px-3 small border-0 mb-0" style="max-width: 450px;">
+                    <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                    <strong>Cautionary Principle:</strong> <span id="safetyNoticeText">The lower-scoring message is not automatically safe. Each message must be validated independently.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Side by Side Metrics -->
+        <div class="row g-4 mb-4">
+            <!-- Message A Column -->
+            <div class="col-lg-6">
+                <div class="cyber-card p-4 h-100" style="border-top: 4px solid var(--accent-cyan);">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="text-white mb-0"><i class="fa-solid fa-font text-info me-2"></i> Message A</h4>
+                        <div class="d-flex align-items-center gap-2">
+                            <span id="langBadgeA" class="badge bg-dark border border-secondary text-info">English</span>
+                            <span id="levelBadgeA" class="badge-risk-low">LOW</span>
+                        </div>
+                    </div>
+
+                    <div class="text-center mb-3">
+                        <div id="circleA" class="score-circle" style="width: 100px; height: 100px;">
+                            <span id="scoreA" class="score-number fs-3">0</span>
+                        </div>
+                        <small class="text-secondary fw-semibold d-block mt-1">Risk Score (0–100)</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <small class="text-secondary fw-semibold d-block mb-1">Context Intent (Innovation 1):</small>
+                        <div id="intentA" class="mb-1"></div>
+                        <div id="intentDescA" class="small text-secondary"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <small class="text-secondary fw-semibold d-block mb-1">Categories Detected:</small>
+                        <div id="categoriesA"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <small class="text-secondary fw-semibold d-block mb-1">Suspicious Phrases:</small>
+                        <div id="phrasesA" class="font-monospace small"></div>
+                    </div>
+
+                    <div>
+                        <small class="text-secondary fw-semibold d-block mb-1">URL Findings:</small>
+                        <div id="urlsA" class="small"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Message B Column -->
+            <div class="col-lg-6">
+                <div class="cyber-card p-4 h-100" style="border-top: 4px solid var(--accent-purple);">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="text-white mb-0"><i class="fa-solid fa-bold text-purple me-2" style="color: var(--accent-purple);"></i> Message B</h4>
+                        <div class="d-flex align-items-center gap-2">
+                            <span id="langBadgeB" class="badge bg-dark border border-secondary text-info">English</span>
+                            <span id="levelBadgeB" class="badge-risk-low">LOW</span>
+                        </div>
+                    </div>
+
+                    <div class="text-center mb-3">
+                        <div id="circleB" class="score-circle" style="width: 100px; height: 100px;">
+                            <span id="scoreB" class="score-number fs-3">0</span>
+                        </div>
+                        <small class="text-secondary fw-semibold d-block mt-1">Risk Score (0–100)</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <small class="text-secondary fw-semibold d-block mb-1">Context Intent (Innovation 1):</small>
+                        <div id="intentB" class="mb-1"></div>
+                        <div id="intentDescB" class="small text-secondary"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <small class="text-secondary fw-semibold d-block mb-1">Categories Detected:</small>
+                        <div id="categoriesB"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <small class="text-secondary fw-semibold d-block mb-1">Suspicious Phrases:</small>
+                        <div id="phrasesB" class="font-monospace small"></div>
+                    </div>
+
+                    <div>
+                        <small class="text-secondary fw-semibold d-block mb-1">URL Findings:</small>
+                        <div id="urlsB" class="small"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Differences Breakdown -->
+        <div class="cyber-card p-4 mb-4">
+            <h5 class="text-white mb-3">
+                <i class="fa-solid fa-scale-balanced text-info me-2"></i> Key Structural & Semantic Differences
+            </h5>
+            <ul id="differencesList" class="list-group list-group-flush cyber-card p-3 small text-secondary"></ul>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="cyber-card p-4">
+            <h5 class="text-white mb-3">
+                <i class="fa-solid fa-shield-halved text-success me-2"></i> Combined Cybersecurity Guidance
+            </h5>
+            <ul id="compareRecommendationsList" class="list-group list-group-flush cyber-card p-3 small text-secondary"></ul>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/main.js}"></script>
+
+<script>
+    function loadSampleComparison() {
+        document.getElementById('textA').value = "URGENT: Your bank account is locked due to suspicious activity. Share your OTP immediately to verify your credentials: http://bank.secure-auth.xyz within 24 hours.";
+        document.getElementById('sourceA').value = "SMS";
+
+        document.getElementById('textB').value = "Security Advisory from State Bank: Never share your OTP, password, or CVV with anyone over phone or text. Bank officials will never ask for credentials.";
+        document.getElementById('sourceB').value = "SMS";
+    }
+
+    async function executeComparison() {
+        const msgA = document.getElementById('textA').value.trim();
+        const srcA = document.getElementById('sourceA').value;
+        const msgB = document.getElementById('textB').value.trim();
+        const srcB = document.getElementById('sourceB').value;
+
+        const alertBox = document.getElementById('compareAlertBox');
+        const loading = document.getElementById('compareLoading');
+        const resultContainer = document.getElementById('compareResultContainer');
+        const compareBtn = document.getElementById('compareBtn');
+
+        alertBox.innerHTML = '';
+
+        if (!msgA || !msgB) {
+            ScamLens.showAlert('compareAlertBox', 'Please enter both Message A and Message B to execute comparison.', 'warning');
+            return;
+        }
+
+        loading.classList.remove('d-none');
+        resultContainer.classList.add('d-none');
+        compareBtn.disabled = true;
+
+        try {
+            const res = await fetch('/api/compare', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    messageA: msgA,
+                    sourceTypeA: srcA,
+                    messageB: msgB,
+                    sourceTypeB: srcB
+                })
+            });
+
+            const data = await res.json();
+            if (!res.ok || !data.success) {
+                throw new Error(data.message || 'Comparison failed.');
+            }
+
+            renderComparison(data.data);
+            resultContainer.classList.remove('d-none');
+            resultContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        } catch (err) {
+            ScamLens.showAlert('compareAlertBox', err.message, 'danger');
+        } finally {
+            loading.classList.add('d-none');
+            compareBtn.disabled = false;
+        }
+    }
+
+    function renderComparison(data) {
+        const a = data.scanA;
+        const b = data.scanB;
+
+        // Verdict
+        document.getElementById('higherRiskText').textContent = data.riskLevelComparison;
+        document.getElementById('diffDescription').textContent = `Risk Score Delta: ${data.scoreDifference} points.`;
+        document.getElementById('safetyNoticeText').textContent = data.safetyNotice;
+
+        // Render Column A
+        populateColumn('A', a);
+
+        // Render Column B
+        populateColumn('B', b);
+
+        // Differences
+        const diffList = document.getElementById('differencesList');
+        diffList.innerHTML = '';
+        data.mainDifferences.forEach(d => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item bg-transparent text-secondary border-0 ps-0 pb-1';
+            li.innerHTML = `<i class="fa-solid fa-arrow-right text-info me-2"></i> ${d}`;
+            diffList.appendChild(li);
+        });
+
+        // Recommendations
+        const recList = document.getElementById('compareRecommendationsList');
+        recList.innerHTML = '';
+        data.combinedRecommendations.forEach(r => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item bg-transparent text-secondary border-0 ps-0 pb-1';
+            li.innerHTML = `<i class="fa-solid fa-check text-success me-2"></i> ${r}`;
+            recList.appendChild(li);
+        });
+    }
+
+    function populateColumn(suffix, scan) {
+        const scoreEl = document.getElementById(`score${suffix}`);
+        const circleEl = document.getElementById(`circle${suffix}`);
+        const badgeEl = document.getElementById(`levelBadge${suffix}`);
+        const langEl = document.getElementById(`langBadge${suffix}`);
+
+        if (langEl) {
+            langEl.textContent = scan.detectedLanguage || 'English';
+        }
+
+        scoreEl.textContent = scan.riskScore;
+        const color = ScamLens.getRiskColor(scan.riskLevel);
+        circleEl.style.borderColor = color;
+        circleEl.style.color = color;
+
+        badgeEl.textContent = scan.riskLevel.toUpperCase();
+        badgeEl.className = ScamLens.getRiskBadgeClass(scan.riskLevel);
+
+        // Context Intent (Innovation 1)
+        const intentBox = document.getElementById(`intent${suffix}`);
+        const intentDescBox = document.getElementById(`intentDesc${suffix}`);
+        const isTamil = (scan.languageCode === 'ta' || (scan.detectedLanguage && scan.detectedLanguage.includes('Tamil')));
+        if (scan.contextEvaluation) {
+            const ctx = scan.contextEvaluation;
+            let bClass = ctx.intentType === 'LEGITIMATE_WARNING' ? 'bg-success' : (ctx.intentType === 'ACTIVE_SCAM_REQUEST' ? 'bg-danger' : 'bg-warning text-dark');
+            const intentLabel = (isTamil && ctx.intentTypeTa) ? ctx.intentTypeTa : ctx.intentType.replace(/_/g, ' ');
+            const intentDesc = (isTamil && ctx.intentDescriptionTa) ? ctx.intentDescriptionTa : ctx.intentDescription;
+            intentBox.innerHTML = `<span class="badge ${bClass}">${intentLabel}</span>`;
+            intentDescBox.textContent = intentDesc;
+        } else {
+            intentBox.innerHTML = `<span class="badge bg-secondary">${scan.warningContext ? (isTamil ? 'பாதுகாப்பு எச்சரிக்கை' : 'LEGITIMATE WARNING') : (isTamil ? 'வழக்கமான மதிப்பீடு' : 'STANDARD')}</span>`;
+            intentDescBox.textContent = scan.warningContext ? (isTamil ? 'கல்வி பாதுகாப்பு எச்சரிக்கையாக அங்கீகரிக்கப்பட்டது' : 'Recognized as educational security advisory') : (isTamil ? 'வழக்கமான செய்தி மதிப்பீடு' : 'Standard message evaluation');
+        }
+
+        // Categories
+        const catBox = document.getElementById(`categories${suffix}`);
+        catBox.innerHTML = '';
+        const cats = (isTamil && scan.categoriesTa && scan.categoriesTa.length > 0) ? scan.categoriesTa : scan.categories;
+        if (cats && cats.length > 0) {
+            cats.forEach(c => {
+                catBox.innerHTML += `<span class="category-tag">${c}</span>`;
+            });
+        } else {
+            catBox.innerHTML = `<small class="text-muted">${isTamil ? 'எதுவுமில்லை' : 'None'}</small>`;
+        }
+
+        // Phrases
+        const phraseBox = document.getElementById(`phrases${suffix}`);
+        phraseBox.innerHTML = '';
+        if (scan.suspiciousPhrases && scan.suspiciousPhrases.length > 0) {
+            scan.suspiciousPhrases.forEach(p => {
+                phraseBox.innerHTML += `<span class="highlight-phrase me-1 mb-1 d-inline-block">${p}</span>`;
+            });
+        } else {
+            phraseBox.innerHTML = '<small class="text-muted">No explicit threat phrases</small>';
+        }
+
+        // URLs
+        const urlBox = document.getElementById(`urls${suffix}`);
+        urlBox.innerHTML = '';
+        if (scan.urlFindings && scan.urlFindings.length > 0) {
+            scan.urlFindings.forEach(u => {
+                const badge = u.suspicious ? '<span class="text-danger fw-bold">[Suspicious]</span>' : '<span class="text-success">[Low Risk]</span>';
+                urlBox.innerHTML += `<div><code>${u.originalUrl}</code> ${badge}</div>`;
+            });
+        } else {
+            urlBox.innerHTML = '<small class="text-muted">No links detected</small>';
+        }
+    }
+</script>
+</body>
+</html>

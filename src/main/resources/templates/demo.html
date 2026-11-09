@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Mode - 12 Sample Scenarios - ScamLens</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container py-4 my-2">
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 mb-2 rounded-pill" style="background: rgba(0, 240, 255, 0.1); border: 1px solid rgba(0, 240, 255, 0.3);">
+            <i class="fa-solid fa-flask-vial text-info"></i>
+            <span class="small fw-semibold text-info">Live Dynamic Demonstration Suite</span>
+        </div>
+        <h2 class="text-white fw-bold mb-2">12 Realistic Cybersecurity Samples</h2>
+        <p class="text-secondary" style="max-width: 750px; margin: 0 auto;">
+            Experience the real Java Spring Boot detection engine. Each sample is evaluated dynamically at runtime across phishing, credential theft, fake jobs, lottery scams, legitimate warnings, and normal communications.
+        </p>
+    </div>
+
+    <!-- Alert Box -->
+    <div id="demoAlertBox"></div>
+
+    <!-- 12 Demo Sample Cards -->
+    <div class="row g-4 mb-5">
+        <div th:each="sample : ${samples}" class="col-lg-4 col-md-6">
+            <div class="cyber-card h-100 d-flex flex-column justify-content-between p-4">
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-dark border border-secondary text-info" th:text="${sample.sourceType}">SMS</span>
+                        <span class="badge bg-dark border border-secondary text-muted" style="font-size: 0.65rem;">SAMPLE DATA</span>
+                    </div>
+                    <h5 class="text-white fw-bold mb-2" th:text="${sample.title}">Sample Title</h5>
+                    <div class="mb-3">
+                        <span class="category-tag" th:text="${sample.expectedCategory}">Phishing</span>
+                    </div>
+                    <div class="p-3 rounded bg-dark border border-secondary font-monospace small text-secondary mb-3" style="max-height: 130px; overflow-y: auto;" th:text="${sample.content}">
+                        Content snippet...
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 pt-2 border-top border-secondary">
+                    <button type="button" class="btn btn-cyber btn-sm flex-grow-1" th:onclick="'analyzeDemo(\'' + ${sample.id} + '\')'">
+                        <i class="fa-solid fa-bolt me-1"></i> Run Java Engine
+                    </button>
+                    <a th:href="@{'/scanner?demoId=' + ${sample.id}}" class="btn btn-cyber-outline btn-sm" title="Open in Scanner">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Live Demo Results -->
+<div class="modal fade" id="demoResultModal" tabindex="-1" aria-labelledby="demoModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content cyber-card p-3 border border-secondary">
+            <div class="modal-header border-bottom border-secondary">
+                <div>
+                    <span class="badge bg-dark border border-secondary text-info mb-1">Live Engine Response</span>
+                    <h5 class="modal-title text-white fw-bold" id="demoModalTitle">Dynamic Heuristic Evaluation</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row align-items-center mb-4">
+                    <div class="col-sm-4 text-center">
+                        <div id="modalScoreCircle" class="score-circle">
+                            <span id="modalScoreNumber" class="score-number">0</span>
+                            <span id="modalScoreLabel" class="score-label">LOW</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-8">
+                        <small class="text-muted d-block mb-1">Categories Identified by Java Engine:</small>
+                        <div id="modalCategories" class="mb-3"></div>
+                        <small class="text-muted d-block mb-1">Extracted Suspicious Phrases:</small>
+                        <div id="modalPhrases" class="small font-monospace"></div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <h6 class="text-white small fw-bold mb-2"><i class="fa-solid fa-triangle-exclamation text-warning me-1"></i> Detected Threat Indicators</h6>
+                    <div class="table-responsive">
+                        <table class="table table-cyber align-middle small mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Indicator</th>
+                                    <th>Category</th>
+                                    <th>Explanation</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modalIndicatorsTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <h6 class="text-white small fw-bold mb-2"><i class="fa-solid fa-list-check text-success me-1"></i> Recommended Actions</h6>
+                    <ul id="modalRecommendations" class="list-group list-group-flush cyber-card p-2 small text-secondary"></ul>
+                </div>
+            </div>
+            <div class="modal-footer border-top border-secondary">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/main.js}"></script>
+
+<script>
+    let demoModal;
+    document.addEventListener('DOMContentLoaded', () => {
+        demoModal = new bootstrap.Modal(document.getElementById('demoResultModal'));
+    });
+
+    async function analyzeDemo(id) {
+        try {
+            const res = await fetch(`/api/demo/analyze/${id}`, { method: 'POST' });
+            const data = await res.json();
+
+            if (!res.ok || !data.success) {
+                throw new Error(data.message || 'Error executing demo analysis.');
+            }
+
+            const scan = data.data;
+
+            // Score Circle
+            const circle = document.getElementById('modalScoreCircle');
+            const num = document.getElementById('modalScoreNumber');
+            const lbl = document.getElementById('modalScoreLabel');
+
+            num.textContent = scan.riskScore;
+            lbl.textContent = scan.riskLevel.toUpperCase();
+            const color = ScamLens.getRiskColor(scan.riskLevel);
+            circle.style.borderColor = color;
+            circle.style.color = color;
+
+            // Categories
+            const catBox = document.getElementById('modalCategories');
+            catBox.innerHTML = '';
+            if (scan.categories && scan.categories.length > 0) {
+                scan.categories.forEach(c => {
+                    catBox.innerHTML += `<span class="category-tag">${c}</span>`;
+                });
+            } else {
+                catBox.innerHTML = '<span class="text-muted small">None</span>';
+            }
+
+            // Phrases
+            const phraseBox = document.getElementById('modalPhrases');
+            phraseBox.innerHTML = '';
+            if (scan.suspiciousPhrases && scan.suspiciousPhrases.length > 0) {
+                scan.suspiciousPhrases.forEach(p => {
+                    phraseBox.innerHTML += `<span class="highlight-phrase me-1 mb-1 d-inline-block">${p}</span>`;
+                });
+            } else {
+                phraseBox.innerHTML = '<span class="text-muted">No explicit threat phrases</span>';
+            }
+
+            // Indicators Table
+            const indTable = document.getElementById('modalIndicatorsTable');
+            indTable.innerHTML = '';
+            if (scan.indicators && scan.indicators.length > 0) {
+                scan.indicators.forEach(i => {
+                    indTable.innerHTML += `
+                        <tr>
+                            <td class="fw-bold text-white">${i.name}</td>
+                            <td><span class="badge bg-dark border border-secondary text-info">${i.category}</span></td>
+                            <td class="small text-secondary">${i.explanation}</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                indTable.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-2">No malicious indicators triggered.</td></tr>`;
+            }
+
+            // Recommendations
+            const recList = document.getElementById('modalRecommendations');
+            recList.innerHTML = '';
+            if (scan.recommendations && scan.recommendations.length > 0) {
+                scan.recommendations.forEach(r => {
+                    recList.innerHTML += `<li class="list-group-item bg-transparent text-secondary border-0 ps-0 py-1"><i class="fa-solid fa-check text-success me-2"></i> ${r}</li>`;
+                });
+            }
+
+            demoModal.show();
+
+        } catch (err) {
+            ScamLens.showAlert('demoAlertBox', err.message, 'danger');
+        }
+    }
+</script>
+</body>
+</html>

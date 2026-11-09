@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Message Scanner - ScamLens Threat Analysis</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container py-4 my-2">
+    <!-- Header -->
+    <div class="text-center mb-4">
+        <div class="d-inline-flex align-items-center gap-2 mb-2 px-3 py-1 rounded-pill bg-dark border border-secondary text-info small">
+            <i class="fa-solid fa-microchip"></i>
+            <span>Three Major Innovations: Context Engine &bull; Explainable Scoring &bull; Integrated Platform</span>
+        </div>
+        <h2 class="text-white fw-bold mb-2">
+            <i class="fa-solid fa-crosshairs text-info me-2"></i> Real-Time Threat Scanner
+        </h2>
+        <p class="text-secondary">Paste any SMS, WhatsApp alert, email text, or suspicious URL for context-aware risk analysis.</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Scanner Card -->
+            <div class="cyber-card cyber-card-glow p-4 mb-4">
+                <form id="scanForm" onsubmit="event.preventDefault(); executeScan();">
+                    <div class="row g-3 align-items-center mb-3">
+                        <div class="col-md-6">
+                            <label for="sourceType" class="form-label small text-secondary fw-semibold">
+                                <i class="fa-solid fa-layer-group text-info me-1"></i> Message Source Type
+                            </label>
+                            <select id="sourceType" class="form-select">
+                                <option value="Auto Detect" selected>Auto Detect</option>
+                                <option value="SMS">SMS Message</option>
+                                <option value="WhatsApp">WhatsApp</option>
+                                <option value="Email">Email Communication</option>
+                                <option value="Social Media">Social Media (Telegram / X / FB)</option>
+                                <option value="Unknown">Unknown Source</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 text-md-end pt-md-4">
+                            <span class="badge bg-dark border border-secondary text-info">
+                                <i class="fa-solid fa-shield me-1"></i> Safe Non-Executing Inspection
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 position-relative">
+                        <label for="messageContent" class="form-label small text-secondary fw-semibold">
+                            <i class="fa-solid fa-file-lines text-info me-1"></i> Suspicious Message Content or URL
+                        </label>
+                        <textarea id="messageContent" class="form-control font-monospace" rows="7" 
+                                  placeholder="Paste the suspicious SMS, WhatsApp message, email body, or suspicious URL here (e.g. 'Dear customer, your account will be suspended within 24 hours. Share your OTP immediately to verify: http://...')"></textarea>
+                        <div class="d-flex justify-content-between align-items-center mt-1 px-1">
+                            <small class="text-secondary fw-semibold" id="charCounter">0 / 10,000 chars</small>
+                            <small class="text-secondary fw-semibold">Maximum input length: 10,000 characters</small>
+                        </div>
+                    </div>
+
+                    <!-- Alerts Container -->
+                    <div id="alertContainer"></div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                        <button type="submit" id="analyzeBtn" class="btn btn-cyber px-4 py-2">
+                            <i class="fa-solid fa-bolt me-1"></i> Analyze Message
+                        </button>
+                        <button type="button" id="clearBtn" class="btn btn-cyber-outline px-3 py-2" onclick="clearScanner()">
+                            <i class="fa-solid fa-rotate-left me-1"></i> Clear
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Loading Spinner State -->
+                <div id="scanLoading" class="text-center py-5 d-none">
+                    <div class="spinner-border text-info mb-3" style="width: 3rem; height: 3rem;" role="status">
+                        <span class="visually-hidden">Analyzing...</span>
+                    </div>
+                    <h5 class="text-white fw-bold">Executing Java Detection Engine</h5>
+                    <p class="text-secondary small mb-0">Evaluating context semantics, decomposing link structures, and calculating explainable risk...</p>
+                </div>
+            </div>
+
+            <!-- Analysis Result Container (Hidden until scanned) -->
+            <div id="resultContainer" class="d-none">
+                <div class="cyber-card p-4 mb-4">
+                    <!-- Result Top Bar -->
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 border-bottom border-secondary pb-3 mb-4">
+                        <div>
+                            <span class="small text-secondary fw-semibold text-uppercase letter-spacing-1">Analysis Completed</span>
+                            <div class="d-flex align-items-center gap-2 mt-1 flex-wrap">
+                                <h3 class="text-white fw-bold mb-0">Heuristic Threat Evaluation</h3>
+                                <span class="badge bg-dark border border-secondary text-info ms-2" id="detectedLanguageBadge">
+                                    <i class="fa-solid fa-language me-1"></i> Language: <strong id="detectedLanguageText">Auto</strong>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-3 flex-wrap">
+                            <!-- Bilingual Language Toggle -->
+                            <div class="btn-group btn-group-sm" role="group" aria-label="Language Selector">
+                                <button type="button" class="btn btn-outline-info active" id="btnLangEn" onclick="switchLanguage('en')">
+                                    <i class="fa-solid fa-globe me-1"></i> English
+                                </button>
+                                <button type="button" class="btn btn-outline-info" id="btnLangTa" onclick="switchLanguage('ta')">
+                                    <i class="fa-solid fa-language me-1"></i> தமிழ்
+                                </button>
+                            </div>
+                            <div class="d-flex gap-2" id="actionButtonsContainer">
+                                <!-- Populated dynamically: Save/PDF buttons -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Score and Main Level Block -->
+                    <div class="row g-4 align-items-center mb-4">
+                        <div class="col-md-4 text-center">
+                            <div id="scoreCircle" class="score-circle">
+                                <span id="scoreNumber" class="score-number">0</span>
+                                <span id="scoreLabel" class="score-label">LOW</span>
+                            </div>
+                            <small class="text-secondary fw-semibold d-block mt-2">Explainable Risk Score (0–100)</small>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="p-3 rounded bg-dark border border-secondary mb-3">
+                                <small class="text-secondary fw-semibold d-block mb-1">Identified Scam Categories:</small>
+                                <div id="categoriesList" class="mt-1">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+                            <div id="warningNotice" class="alert alert-info py-2 small d-none" role="alert">
+                                <i class="fa-solid fa-shield-halved me-1"></i> <strong>Context Recognized:</strong> This message was evaluated as an official advisory or safety alert warning users not to disclose credentials.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Innovation 1: Context-Aware Intent Evaluation -->
+                    <div class="cyber-card p-3 mb-4 bg-dark bg-opacity-50 border border-secondary">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <h6 class="text-white fw-bold mb-0">
+                                <i class="fa-solid fa-brain text-info me-2"></i> Innovation 1: Context-Aware Intent Evaluation
+                            </h6>
+                            <span id="intentBadge" class="badge bg-secondary">ANALYZING</span>
+                        </div>
+                        <p id="intentDescription" class="small text-secondary mb-3"></p>
+                        <div class="row g-2 small">
+                            <div class="col-md-4">
+                                <div class="p-2 rounded bg-dark border border-secondary">
+                                    <span class="text-secondary fw-semibold d-block">Negation Detection:</span>
+                                    <strong id="negationStatus" class="text-info">None</strong>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-2 rounded bg-dark border border-secondary">
+                                    <span class="text-secondary fw-semibold d-block">Credential Harvest Target:</span>
+                                    <strong id="credentialStatus" class="text-warning">None</strong>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-2 rounded bg-dark border border-secondary">
+                                    <span class="text-secondary fw-semibold d-block">Action Directives:</span>
+                                    <strong id="actionsStatus" class="text-white">None</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Suspicious Phrases Highlight -->
+                    <div class="mb-4">
+                        <h6 class="text-white fw-bold mb-2">
+                            <i class="fa-solid fa-quote-left text-info me-1"></i> Highlighted Suspicious Words and Phrases
+                        </h6>
+                        <div id="phrasesContainer" class="p-3 rounded bg-dark border border-secondary font-monospace small">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Innovation 2: Detailed Indicators Table with Weights -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="text-white fw-bold mb-0">
+                                <i class="fa-solid fa-scale-balanced text-warning me-1"></i> Innovation 2: Explainable Multi-Indicator Scoring Breakdown
+                            </h6>
+                            <span id="rawVsFinalScore" class="badge bg-dark border border-secondary text-info small"></span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-cyber align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Indicator</th>
+                                        <th>Category</th>
+                                        <th>Matched Text</th>
+                                        <th>Weight</th>
+                                        <th>Threat Explanation</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="indicatorsTableBody">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="scoreAdjustmentNotice" class="small text-secondary mt-2"></div>
+                    </div>
+
+                    <!-- Innovation 3: Combined Passive URL Inspection -->
+                    <div class="mb-4">
+                        <h6 class="text-white fw-bold mb-2">
+                            <i class="fa-solid fa-link text-info me-1"></i> Innovation 3: Passive URL Inspection Results
+                        </h6>
+                        <div id="urlFindingsContainer">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Recommended Actions Section -->
+                    <div class="mb-3">
+                        <h6 class="text-white fw-bold mb-2">
+                            <i class="fa-solid fa-list-check text-success me-1"></i> Recommended Cybersecurity Actions
+                        </h6>
+                        <ul id="recommendationsList" class="list-group list-group-flush cyber-card p-3 small text-secondary">
+                            <!-- Populated dynamically -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/main.js}"></script>
+
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+        ScamLens.initCharCounter('messageContent', 'charCounter', 10000);
+
+        // Check if demo query param is present
+        const urlParams = new URLSearchParams(window.location.search);
+        const demoId = urlParams.get('demoId');
+        if (demoId) {
+            fetch(`/api/demo/samples`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.data) {
+                        const sample = data.data.find(s => s.id === demoId);
+                        if (sample) {
+                            document.getElementById('messageContent').value = sample.content;
+                            document.getElementById('sourceType').value = sample.sourceType;
+                            document.getElementById('messageContent').dispatchEvent(new Event('input'));
+                            executeScan();
+                        }
+                    }
+                });
+        }
+    });
+
+    function clearScanner() {
+        document.getElementById('messageContent').value = '';
+        document.getElementById('sourceType').value = 'Auto Detect';
+        document.getElementById('messageContent').dispatchEvent(new Event('input'));
+        document.getElementById('alertContainer').innerHTML = '';
+        document.getElementById('resultContainer').classList.add('d-none');
+    }
+
+    async function executeScan() {
+        const text = document.getElementById('messageContent').value.trim();
+        const sourceType = document.getElementById('sourceType').value;
+        const alertBox = document.getElementById('alertContainer');
+        const loading = document.getElementById('scanLoading');
+        const resultContainer = document.getElementById('resultContainer');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+
+        alertBox.innerHTML = '';
+
+        if (!text) {
+            ScamLens.showAlert('alertContainer', 'Please paste or type suspicious content to analyze.', 'warning');
+            return;
+        }
+
+        if (text.length > 10000) {
+            ScamLens.showAlert('alertContainer', 'Message exceeds 10,000 characters limit.', 'danger');
+            return;
+        }
+
+        // Show spinner
+        loading.classList.remove('d-none');
+        resultContainer.classList.add('d-none');
+        analyzeBtn.disabled = true;
+
+        try {
+            const response = await fetch('/api/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: text, sourceType: sourceType })
+            });
+
+            const resData = await response.json();
+
+            if (!response.ok || !resData.success) {
+                throw new Error(resData.message || 'Error occurred while analyzing message.');
+            }
+
+            renderScanResult(resData.data);
+            resultContainer.classList.remove('d-none');
+            resultContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        } catch (err) {
+            ScamLens.showAlert('alertContainer', err.message, 'danger');
+        } finally {
+            loading.classList.add('d-none');
+            analyzeBtn.disabled = false;
+        }
+    }
+
+    let currentScanData = null;
+    let currentLanguage = 'en';
+
+    function switchLanguage(lang) {
+        currentLanguage = lang;
+        const btnEn = document.getElementById('btnLangEn');
+        const btnTa = document.getElementById('btnLangTa');
+        if (lang === 'ta') {
+            btnTa.classList.add('active');
+            btnEn.classList.remove('active');
+        } else {
+            btnEn.classList.add('active');
+            btnTa.classList.remove('active');
+        }
+        if (currentScanData) {
+            renderBilingualFields(currentScanData, currentLanguage);
+            renderPhrasesAndUrls(currentScanData, currentLanguage);
+        }
+    }
+
+    function renderScanResult(data) {
+        currentScanData = data;
+
+        // Set Detected Language
+        const detectedLangText = document.getElementById('detectedLanguageText');
+        if (data.detectedLanguage) {
+            detectedLangText.textContent = data.detectedLanguage;
+            if (data.languageCode === 'ta' || (data.detectedLanguage && data.detectedLanguage.includes('Tamil'))) {
+                currentLanguage = 'ta';
+                document.getElementById('btnLangTa').classList.add('active');
+                document.getElementById('btnLangEn').classList.remove('active');
+            } else {
+                currentLanguage = 'en';
+                document.getElementById('btnLangEn').classList.add('active');
+                document.getElementById('btnLangTa').classList.remove('active');
+            }
+        }
+
+        // 1. Score Circle
+        const scoreCircle = document.getElementById('scoreCircle');
+        const scoreNumber = document.getElementById('scoreNumber');
+        const scoreLabel = document.getElementById('scoreLabel');
+
+        scoreNumber.textContent = data.riskScore;
+        scoreLabel.textContent = (data.riskLevel || 'LOW').toUpperCase();
+
+        const color = ScamLens.getRiskColor(data.riskLevel);
+        scoreCircle.style.borderColor = color;
+        scoreCircle.style.color = color;
+
+        // 2. Render Bilingual Dynamic Fields
+        renderBilingualFields(data, currentLanguage);
+
+        // 3. Highlighted Phrases & URLs
+        renderPhrasesAndUrls(data, currentLanguage);
+
+        // 4. Action Buttons (e.g., Download PDF if stored)
+        const btnBox = document.getElementById('actionButtonsContainer');
+        btnBox.innerHTML = '';
+        if (data.id) {
+            btnBox.innerHTML = `
+                <a href="/api/report/${data.id}/pdf" class="btn btn-sm btn-outline-danger" target="_blank">
+                    <i class="fa-solid fa-file-pdf me-1"></i> Download PDF
+                </a>
+                <a href="/result/${data.id}" class="btn btn-sm btn-outline-info">
+                    <i class="fa-solid fa-file-lines me-1"></i> Full Report
+                </a>
+            `;
+        }
+    }
+
+    function renderPhrasesAndUrls(data, lang) {
+        // Highlighted Phrases
+        const phrasesBox = document.getElementById('phrasesContainer');
+        if (data.suspiciousPhrases && data.suspiciousPhrases.length > 0) {
+            phrasesBox.innerHTML = data.suspiciousPhrases.map(p => 
+                `<span class="highlight-phrase me-2 d-inline-block mb-1">${escapeHtml(p)}</span>`
+            ).join(' ');
+        } else {
+            phrasesBox.innerHTML = `<span class="text-secondary">${lang === 'ta' ? 'சந்தேகத்திற்கிடமான சொற்றொடர்கள் எதுவும் கண்டறியப்படவில்லை.' : 'No explicit suspicious phrase patterns detected.'}</span>`;
+        }
+
+        // Passive URL Inspection
+        const urlBox = document.getElementById('urlFindingsContainer');
+        urlBox.innerHTML = '';
+        if (data.urlFindings && data.urlFindings.length > 0) {
+            let urlHtml = '<div class="table-responsive"><table class="table table-cyber align-middle"><thead><tr><th>Target URL</th><th>Status</th><th>Inspection Findings</th></tr></thead><tbody>';
+            data.urlFindings.forEach(uf => {
+                const badge = uf.suspicious ? '<span class="badge-risk-critical">SUSPICIOUS</span>' : '<span class="badge-risk-low">LOW RISK</span>';
+                const reasons = (uf.reasons && uf.reasons.length > 0) ? uf.reasons.join('<br>') : (lang === 'ta' ? 'அசாதாரண பண்புகள் எதுவும் கண்டறியப்படவில்லை' : 'No anomalous characteristics detected');
+                urlHtml += `<tr>
+                    <td><code class="text-info">${escapeHtml(uf.originalUrl)}</code></td>
+                    <td>${badge}</td>
+                    <td class="small text-secondary">${reasons}</td>
+                </tr>`;
+            });
+            urlHtml += '</tbody></table></div>';
+            urlBox.innerHTML = urlHtml;
+        } else {
+            urlBox.innerHTML = `<p class="small text-secondary mb-0"><i class="fa-solid fa-info-circle me-1"></i> ${lang === 'ta' ? 'இச்செய்தியில் இணைப்புகள் (URL) எதுவும் இல்லை.' : 'No URLs identified in this message.'}</p>`;
+        }
+    }
+
+    function renderBilingualFields(data, lang) {
+        // Categories
+        const catContainer = document.getElementById('categoriesList');
+        catContainer.innerHTML = '';
+        const cats = (lang === 'ta' && data.categoriesTa && data.categoriesTa.length > 0) ? data.categoriesTa : data.categories;
+        if (cats && cats.length > 0) {
+            cats.forEach(cat => {
+                const span = document.createElement('span');
+                span.className = 'category-tag me-2 mb-2 d-inline-block';
+                span.textContent = cat;
+                catContainer.appendChild(span);
+                catContainer.appendChild(document.createTextNode(' '));
+            });
+        } else {
+            catContainer.innerHTML = `<span class="text-secondary small">${lang === 'ta' ? 'குறிப்பிட்ட மோசடி வகைகள் பொருந்தவில்லை.' : 'No specific scam categories matched.'}</span>`;
+        }
+
+        // Warning Context Notice
+        const warnNotice = document.getElementById('warningNotice');
+        if (data.warningContext) {
+            warnNotice.classList.remove('d-none');
+            warnNotice.innerHTML = lang === 'ta'
+                ? '<i class="fa-solid fa-shield-halved me-1"></i> <strong>சூழ்நிலை அங்கீகரிக்கப்பட்டது:</strong> இச்செய்தி அங்கீகரிக்கப்பட்ட அதிகாரப்பூர்வ பாதுகாப்பு எச்சரிக்கையாக மதிப்பிடப்பட்டுள்ளது. ரகசிய விவரங்களைப் பகிர வேண்டாம் என எச்சரிக்கிறது.'
+                : '<i class="fa-solid fa-shield-halved me-1"></i> <strong>Context Recognized:</strong> This message was evaluated as an official advisory or safety alert warning users not to disclose credentials.';
+        } else {
+            warnNotice.classList.add('d-none');
+        }
+
+        // Innovation 1: Context Evaluation Card
+        const intentBadge = document.getElementById('intentBadge');
+        const intentDesc = document.getElementById('intentDescription');
+        const negStatus = document.getElementById('negationStatus');
+        const credStatus = document.getElementById('credentialStatus');
+        const actStatus = document.getElementById('actionsStatus');
+
+        if (data.contextEvaluation) {
+            const ctx = data.contextEvaluation;
+            let badgeClass = 'bg-secondary';
+            if (ctx.intentType === 'LEGITIMATE_WARNING') badgeClass = 'bg-success';
+            else if (ctx.intentType === 'ACTIVE_SCAM_REQUEST') badgeClass = 'bg-danger';
+            else if (ctx.intentType === 'SUSPICIOUS_DEMAND') badgeClass = 'bg-warning text-dark';
+            else badgeClass = 'bg-info text-dark';
+
+            intentBadge.className = `badge ${badgeClass} text-uppercase px-2 py-1`;
+            intentBadge.textContent = (lang === 'ta' && ctx.intentTypeTa) ? ctx.intentTypeTa : (ctx.intentType || '').replace(/_/g, ' ');
+            intentDesc.textContent = (lang === 'ta' && ctx.intentDescriptionTa) ? ctx.intentDescriptionTa : (ctx.intentDescription || '');
+
+            if (ctx.negationDetected) {
+                negStatus.textContent = (Array.isArray(ctx.negationPhrases) && ctx.negationPhrases.length > 0) ? ctx.negationPhrases.join(', ') : (lang === 'ta' ? 'கண்டறியப்பட்டது (பாதுகாப்பு)' : 'Detected');
+            } else {
+                negStatus.textContent = lang === 'ta' ? 'எதுவுமில்லை' : 'None Detected';
+            }
+
+            const creds = (data.credentialTargets && data.credentialTargets.length > 0)
+                ? data.credentialTargets
+                : (ctx.requestedCredentials && ctx.requestedCredentials.length > 0 ? ctx.requestedCredentials : null);
+            if (creds && creds.length > 0) {
+                credStatus.textContent = Array.isArray(creds) ? creds.join(', ') : creds;
+            } else {
+                credStatus.textContent = lang === 'ta' ? 'கோரிக்கை இல்லை' : 'None Requested';
+            }
+
+            const acts = (data.actionDirectives && data.actionDirectives.length > 0)
+                ? data.actionDirectives
+                : (ctx.suspiciousActionsIdentified && ctx.suspiciousActionsIdentified.length > 0 ? ctx.suspiciousActionsIdentified : null);
+            if (acts && acts.length > 0) {
+                actStatus.textContent = Array.isArray(acts) ? acts.join('; ') : acts;
+            } else {
+                actStatus.textContent = lang === 'ta' ? 'கட்டளைகள் ஏதுமில்லை' : 'None Identified';
+            }
+        } else {
+            intentBadge.textContent = data.warningContext ? (lang === 'ta' ? 'பாதுகாப்பு எச்சரிக்கை' : 'LEGITIMATE WARNING') : (lang === 'ta' ? 'வழக்கமான மதிப்பீடு' : 'STANDARD EVALUATION');
+            intentDesc.textContent = lang === 'ta' ? 'விதி அடிப்படையிலான சூழ்நிலை மதிப்பீடு செயல்படுத்தப்பட்டது.' : 'Rule-based contextual evaluation executed.';
+        }
+
+        // Innovation 2: Indicators Breakdown Table
+        const tableBody = document.getElementById('indicatorsTableBody');
+        const rawScoreBadge = document.getElementById('rawVsFinalScore');
+        const scoreAdjustNotice = document.getElementById('scoreAdjustmentNotice');
+        tableBody.innerHTML = '';
+
+        if (data.scoreBreakdown && data.scoreBreakdown.contributions && data.scoreBreakdown.contributions.length > 0) {
+            rawScoreBadge.textContent = `${lang === 'ta' ? 'மூல எடை' : 'Raw Weight'}: ${data.scoreBreakdown.rawTotalScore} pts → ${lang === 'ta' ? 'இறுதி மதிப்பெண்' : 'Final Score'}: ${data.scoreBreakdown.finalScore}/100`;
+            data.scoreBreakdown.contributions.forEach(contrib => {
+                const tr = document.createElement('tr');
+                const nameText = (lang === 'ta' && contrib.nameTa) ? contrib.nameTa : contrib.name;
+                const catText = (lang === 'ta' && contrib.categoryTa) ? contrib.categoryTa : contrib.category;
+                const expText = (lang === 'ta' && contrib.impactExplanationTa) ? contrib.impactExplanationTa : contrib.impactExplanation;
+                tr.innerHTML = `
+                    <td class="fw-bold text-white">${escapeHtml(nameText)}</td>
+                    <td><span class="badge bg-dark border border-secondary text-info">${escapeHtml(catText)}</span></td>
+                    <td><code class="text-warning">${escapeHtml(contrib.matchedPhrase || 'N/A')}</code></td>
+                    <td><span class="badge bg-primary">+${contrib.weight} pts</span></td>
+                    <td class="small text-secondary">${escapeHtml(expText)}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+
+            let notices = [];
+            const adjNotice = (lang === 'ta' && data.scoreBreakdown.contextAdjustmentTa) ? data.scoreBreakdown.contextAdjustmentTa : data.scoreBreakdown.contextAdjustment;
+            if (adjNotice) {
+                notices.push(`<i class="fa-solid fa-circle-info text-info me-1"></i> ${escapeHtml(adjNotice)}`);
+            }
+            const caps = (lang === 'ta' && data.scoreBreakdown.categoryCapsAppliedTa && data.scoreBreakdown.categoryCapsAppliedTa.length > 0) ? data.scoreBreakdown.categoryCapsAppliedTa : data.scoreBreakdown.categoryCapsApplied;
+            if (caps && caps.length > 0) {
+                caps.forEach(c => {
+                    notices.push(`<i class="fa-solid fa-shield text-warning me-1"></i> ${escapeHtml(c)}`);
+                });
+            }
+            scoreAdjustNotice.innerHTML = notices.join('<br>');
+        } else if (data.indicators && data.indicators.length > 0) {
+            data.indicators.forEach(ind => {
+                const tr = document.createElement('tr');
+                const nameText = (lang === 'ta' && ind.nameTa) ? ind.nameTa : ind.name;
+                const catText = (lang === 'ta' && ind.categoryTa) ? ind.categoryTa : ind.category;
+                const expText = (lang === 'ta' && ind.explanationTa) ? ind.explanationTa : ind.explanation;
+                tr.innerHTML = `
+                    <td class="fw-bold text-white">${escapeHtml(nameText)}</td>
+                    <td><span class="badge bg-dark border border-secondary text-info">${escapeHtml(catText)}</span></td>
+                    <td><code class="text-warning">${escapeHtml(ind.matchedPhrase || 'N/A')}</code></td>
+                    <td><span class="badge bg-primary">+${ind.weight} pts</span></td>
+                    <td class="small text-secondary">${escapeHtml(expText)}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+            scoreAdjustNotice.innerHTML = '';
+        } else {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center text-secondary py-3">
+                        <i class="fa-solid fa-check-circle text-success me-1"></i> ${lang === 'ta' ? 'அதிக ஆபத்துள்ள குறிகாட்டிகள் எதுவும் கண்டறியப்படவில்லை.' : 'No high-risk indicators detected in message body.'}
+                    </td>
+                </tr>
+            `;
+            scoreAdjustNotice.innerHTML = '';
+        }
+
+        // Recommendations
+        const recList = document.getElementById('recommendationsList');
+        recList.innerHTML = '';
+        const recs = (lang === 'ta' && data.recommendationsTa && data.recommendationsTa.length > 0) ? data.recommendationsTa : data.recommendations;
+        if (recs && recs.length > 0) {
+            recs.forEach(r => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item bg-transparent text-secondary border-0 ps-0 pb-1';
+                li.innerHTML = `<i class="fa-solid fa-shield-halved text-info me-2"></i> ${escapeHtml(r)}`;
+                recList.appendChild(li);
+            });
+        }
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+</script>
+</body>
+</html>

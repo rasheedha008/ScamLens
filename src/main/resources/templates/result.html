@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan Report #<span th:text="${scan.id}">1</span> - ScamLens</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container py-4 my-2">
+    <!-- Top Action Bar -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 border-bottom border-secondary pb-3">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                <span class="badge bg-dark border border-secondary text-info">Incident Report</span>
+                <span class="text-muted small" th:text="'Scan ID: #' + ${scan.id}">#1</span>
+                <span class="badge bg-dark border border-secondary text-info" id="reportLangBadge">
+                    <i class="fa-solid fa-language me-1"></i> <span th:text="${scan.detectedLanguage != null ? scan.detectedLanguage : 'English'}">English</span>
+                </span>
+            </div>
+            <h2 class="text-white fw-bold mb-0">Cybersecurity Analysis Report</h2>
+        </div>
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <!-- Language Selector Toggle -->
+            <div class="btn-group btn-group-sm me-2" role="group" aria-label="Language Selector">
+                <button type="button" class="btn btn-outline-info active" id="btnReportEn" onclick="switchReportLang('en')">
+                    <i class="fa-solid fa-globe me-1"></i> English
+                </button>
+                <button type="button" class="btn btn-outline-info" id="btnReportTa" onclick="switchReportLang('ta')">
+                    <i class="fa-solid fa-language me-1"></i> தமிழ்
+                </button>
+            </div>
+            <a th:href="@{'/api/report/' + ${scan.id} + '/pdf'}" class="btn btn-danger" target="_blank">
+                <i class="fa-solid fa-file-pdf me-1"></i> Download PDF Report
+            </a>
+            <a th:href="@{/scanner}" class="btn btn-cyber">
+                <i class="fa-solid fa-crosshairs me-1"></i> Scan Another Message
+            </a>
+            <a th:href="@{/history}" class="btn btn-cyber-outline">
+                <i class="fa-solid fa-clock-rotate-left me-1"></i> View Scan History
+            </a>
+        </div>
+    </div>
+
+    <!-- Metadata Grid -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-2 col-6">
+            <div class="cyber-card p-3">
+                <small class="text-secondary fw-semibold d-block">Source Type</small>
+                <span class="fw-bold text-white fs-6" th:text="${scan.sourceType}">SMS</span>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="cyber-card p-3">
+                <small class="text-secondary fw-semibold d-block">Scan Timestamp</small>
+                <span class="fw-bold text-white fs-6" th:text="${#temporals.format(scan.createdAt, 'yyyy-MM-dd HH:mm')}">2026-11-06</span>
+            </div>
+        </div>
+        <div class="col-md-2 col-6">
+            <div class="cyber-card p-3">
+                <small class="text-secondary fw-semibold d-block">Detected Language</small>
+                <span class="fw-bold text-info fs-6" th:text="${scan.detectedLanguage != null ? scan.detectedLanguage : 'English'}">English</span>
+            </div>
+        </div>
+        <div class="col-md-2 col-6">
+            <div class="cyber-card p-3">
+                <small class="text-secondary fw-semibold d-block">Risk Level</small>
+                <span th:class="${scan.riskLevel == 'Critical' ? 'badge-risk-critical' : (scan.riskLevel == 'High' ? 'badge-risk-high' : (scan.riskLevel == 'Medium' ? 'badge-risk-medium' : 'badge-risk-low'))}" th:text="${scan.riskLevel}">Low</span>
+            </div>
+        </div>
+        <div class="col-md-3 col-12">
+            <div class="cyber-card p-3">
+                <small class="text-secondary fw-semibold d-block">Primary Threat Category</small>
+                <span class="fw-bold text-info fs-6" id="reportCategoryEn" th:text="${scan.categories != null and !scan.categories.isEmpty() ? #strings.listJoin(scan.categories, ', ') : 'None'}">Phishing</span>
+                <span class="fw-bold text-info fs-6 d-none" id="reportCategoryTa" th:text="${scan.categoriesTa != null and !scan.categoriesTa.isEmpty() ? #strings.listJoin(scan.categoriesTa, ', ') : (scan.categories != null and !scan.categories.isEmpty() ? #strings.listJoin(scan.categories, ', ') : 'எதுவுமில்லை')}">Phishing</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Score and Submitted Content Card -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-4 text-center">
+            <div class="cyber-card p-4 h-100 d-flex flex-column justify-content-center">
+                <div class="score-circle mb-3" 
+                     th:style="'border-color: ' + (${scan.riskScore >= 75 ? 'var(--risk-critical)' : (scan.riskScore >= 50 ? 'var(--risk-high)' : (scan.riskScore >= 25 ? 'var(--risk-medium)' : 'var(--risk-low)'))}) + '; color: ' + (${scan.riskScore >= 75 ? 'var(--risk-critical)' : (scan.riskScore >= 50 ? 'var(--risk-high)' : (scan.riskScore >= 25 ? 'var(--risk-medium)' : 'var(--risk-low)'))})">
+                    <span class="score-number" th:text="${scan.riskScore}">0</span>
+                    <span class="score-label" th:text="${scan.riskLevel}">LOW</span>
+                </div>
+                <h5 class="text-white mb-1" th:text="'Risk Classification: ' + ${scan.riskLevel}">Classification</h5>
+                <small class="text-muted">Calculated via Explainable Multi-Indicator Scoring</small>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="cyber-card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="text-white mb-0"><i class="fa-solid fa-envelope-open-text text-info me-2"></i> Original Submitted Content</h5>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="ScamLens.copyToClipboard(document.getElementById('msgText').innerText, this)">
+                        <i class="fa-solid fa-copy me-1"></i> Copy
+                    </button>
+                </div>
+                <div class="p-3 rounded bg-dark border border-secondary font-monospace small text-secondary" id="msgText" style="white-space: pre-wrap;" th:text="${scan.originalMessage}">
+                    Original message text content...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Innovation 1: Context-Aware Intent Evaluation -->
+    <div class="cyber-card p-4 mb-4" th:if="${scan.contextEvaluation != null}">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+            <h5 class="text-white mb-0">
+                <i class="fa-solid fa-brain text-info me-2"></i> Innovation 1: Context-Aware Semantic Intent Evaluation
+            </h5>
+            <div>
+                <span class="badge lang-en" 
+                      th:classappend="${scan.contextEvaluation.intentType == 'LEGITIMATE_WARNING' ? 'bg-success' : (scan.contextEvaluation.intentType == 'ACTIVE_SCAM_REQUEST' ? 'bg-danger' : 'bg-warning text-dark')}"
+                      th:text="${scan.contextEvaluation.intentType}">INTENT</span>
+                <span class="badge lang-ta d-none" 
+                      th:classappend="${scan.contextEvaluation.intentType == 'LEGITIMATE_WARNING' ? 'bg-success' : (scan.contextEvaluation.intentType == 'ACTIVE_SCAM_REQUEST' ? 'bg-danger' : 'bg-warning text-dark')}"
+                      th:text="${scan.contextEvaluation.intentTypeTa != null ? scan.contextEvaluation.intentTypeTa : scan.contextEvaluation.intentType}">INTENT</span>
+            </div>
+        </div>
+        <p class="text-secondary small mb-3 lang-en" th:text="${scan.contextEvaluation.intentDescription}">Context rationale</p>
+        <p class="text-secondary small mb-3 lang-ta d-none" th:text="${scan.contextEvaluation.intentDescriptionTa != null ? scan.contextEvaluation.intentDescriptionTa : scan.contextEvaluation.intentDescription}">Context rationale</p>
+        
+        <div class="row g-3 small">
+            <div class="col-md-4">
+                <div class="p-3 rounded bg-dark border border-secondary h-100">
+                    <span class="text-secondary fw-semibold d-block mb-1"><i class="fa-solid fa-shield-halved text-info me-1"></i> Negation Protection:</span>
+                    <strong class="text-white" th:text="${scan.contextEvaluation.negationDetected ? #strings.listJoin(scan.contextEvaluation.negationPhrases, ', ') : 'None Detected'}">None</strong>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-3 rounded bg-dark border border-secondary h-100">
+                    <span class="text-secondary fw-semibold d-block mb-1"><i class="fa-solid fa-key text-warning me-1"></i> Harvest Targets:</span>
+                    <strong class="text-warning" th:text="${scan.credentialTargets != null and !scan.credentialTargets.isEmpty() ? #strings.listJoin(scan.credentialTargets, ', ') : (scan.contextEvaluation.requestIntentDetected ? #strings.listJoin(scan.contextEvaluation.requestedCredentials, ', ') : 'None Requested')}">None</strong>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-3 rounded bg-dark border border-secondary h-100">
+                    <span class="text-secondary fw-semibold d-block mb-1"><i class="fa-solid fa-bolt text-danger me-1"></i> Suspicious Directives:</span>
+                    <strong class="text-white" th:text="${scan.actionDirectives != null and !scan.actionDirectives.isEmpty() ? #strings.listJoin(scan.actionDirectives, '; ') : (#lists.isEmpty(scan.contextEvaluation.suspiciousActionsIdentified) ? 'None Identified' : #strings.listJoin(scan.contextEvaluation.suspiciousActionsIdentified, '; '))}">None</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Suspicious Words & Phrases -->
+    <div class="cyber-card p-4 mb-4">
+        <h5 class="text-white mb-3">
+            <i class="fa-solid fa-quote-left text-info me-2"></i> Highlighted Suspicious Phrases
+        </h5>
+        <div th:if="${#lists.isEmpty(scan.suspiciousPhrases)}" class="text-muted small">
+            <i class="fa-solid fa-circle-check text-success me-1"></i> No high-risk phrases isolated.
+        </div>
+        <div th:if="${!#lists.isEmpty(scan.suspiciousPhrases)}">
+            <span th:each="phrase : ${scan.suspiciousPhrases}" class="highlight-phrase me-2 d-inline-block mb-1" th:text="${phrase}">
+                phrase
+            </span>
+        </div>
+    </div>
+
+    <!-- Innovation 2: Detailed Indicator Explanations Table with Weights -->
+    <div class="cyber-card p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="text-white mb-0">
+                <i class="fa-solid fa-scale-balanced text-warning me-2"></i> Innovation 2: Explainable Multi-Indicator Scoring Breakdown
+            </h5>
+            <span class="badge bg-dark border border-secondary text-info" th:if="${scan.scoreBreakdown != null}"
+                  th:text="'Raw Total: ' + ${scan.scoreBreakdown.rawTotalScore} + ' pts &rarr; Final Score: ' + ${scan.scoreBreakdown.finalScore} + '/100'">
+            </span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-cyber align-middle">
+                <thead>
+                    <tr>
+                        <th>Indicator</th>
+                        <th>Category</th>
+                        <th>Matched Text</th>
+                        <th>Weight</th>
+                        <th>Threat Explanation</th>
+                    </tr>
+                </thead>
+                <tbody th:if="${scan.scoreBreakdown != null and !#lists.isEmpty(scan.scoreBreakdown.contributions)}">
+                    <tr th:each="contrib : ${scan.scoreBreakdown.contributions}">
+                        <td class="fw-bold text-white">
+                            <span class="lang-en" th:text="${contrib.name}">Indicator Name</span>
+                            <span class="lang-ta d-none" th:text="${contrib.nameTa != null ? contrib.nameTa : contrib.name}">குறிகாட்டி</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-dark border border-secondary text-info lang-en" th:text="${contrib.category}">Category</span>
+                            <span class="badge bg-dark border border-secondary text-info lang-ta d-none" th:text="${contrib.categoryTa != null ? contrib.categoryTa : contrib.category}">வகை</span>
+                        </td>
+                        <td><code class="text-warning" th:text="${contrib.matchedPhrase}">phrase</code></td>
+                        <td><span class="badge bg-primary" th:text="'+' + ${contrib.weight} + ' pts'">+25 pts</span></td>
+                        <td class="small text-secondary">
+                            <span class="lang-en" th:text="${contrib.impactExplanation}">Explanation text</span>
+                            <span class="lang-ta d-none" th:text="${contrib.impactExplanationTa != null ? contrib.impactExplanationTa : contrib.impactExplanation}">விளக்கம்</span>
+                        </td>
+                    </tr>
+                </tbody>
+                <tbody th:if="${scan.scoreBreakdown == null or #lists.isEmpty(scan.scoreBreakdown.contributions)}">
+                    <tr th:if="${#lists.isEmpty(scan.indicators)}">
+                        <td colspan="5" class="text-center text-muted py-3">No specific malicious indicators triggered.</td>
+                    </tr>
+                    <tr th:each="ind : ${scan.indicators}">
+                        <td class="fw-bold text-white">
+                            <span class="lang-en" th:text="${ind.name}">Indicator Name</span>
+                            <span class="lang-ta d-none" th:text="${ind.nameTa != null ? ind.nameTa : ind.name}">குறிகாட்டி</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-dark border border-secondary text-info lang-en" th:text="${ind.category}">Category</span>
+                            <span class="badge bg-dark border border-secondary text-info lang-ta d-none" th:text="${ind.categoryTa != null ? ind.categoryTa : ind.category}">வகை</span>
+                        </td>
+                        <td><code class="text-warning" th:text="${ind.matchedPhrase}">phrase</code></td>
+                        <td><span class="badge bg-primary" th:text="'+' + ${ind.weight} + ' pts'">+25 pts</span></td>
+                        <td class="small text-secondary">
+                            <span class="lang-en" th:text="${ind.explanation}">Explanation text</span>
+                            <span class="lang-ta d-none" th:text="${ind.explanationTa != null ? ind.explanationTa : ind.explanation}">விளக்கம்</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div th:if="${scan.scoreBreakdown != null}" class="mt-2 small text-muted">
+            <div th:if="${scan.scoreBreakdown.contextAdjustment != null}" class="mb-1">
+                <i class="fa-solid fa-circle-info text-info me-1"></i>
+                <span class="lang-en" th:text="${scan.scoreBreakdown.contextAdjustment}">Adjustment</span>
+                <span class="lang-ta d-none" th:text="${scan.scoreBreakdown.contextAdjustmentTa != null ? scan.scoreBreakdown.contextAdjustmentTa : scan.scoreBreakdown.contextAdjustment}">Adjustment</span>
+            </div>
+            <div th:each="capNotice : ${scan.scoreBreakdown.categoryCapsApplied}" class="lang-en">
+                <i class="fa-solid fa-shield text-warning me-1"></i> <span th:text="${capNotice}">Cap notice</span>
+            </div>
+            <div th:each="capNoticeTa : ${scan.scoreBreakdown.categoryCapsAppliedTa}" class="lang-ta d-none">
+                <i class="fa-solid fa-shield text-warning me-1"></i> <span th:text="${capNoticeTa}">Cap notice</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Innovation 3: URL Findings -->
+    <div class="cyber-card p-4 mb-4">
+        <h5 class="text-white mb-3">
+            <i class="fa-solid fa-link text-info me-2"></i> Innovation 3: Passive URL Inspection Findings
+        </h5>
+        <div th:if="${#lists.isEmpty(scan.urlFindings)}" class="text-muted small">
+            <i class="fa-solid fa-info-circle me-1"></i> No URLs detected in the message.
+        </div>
+        <div th:if="${!#lists.isEmpty(scan.urlFindings)}" class="table-responsive">
+            <table class="table table-cyber align-middle">
+                <thead>
+                    <tr>
+                        <th>Analyzed Link</th>
+                        <th>Classification</th>
+                        <th>Identified Risk Characteristics</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="uf : ${scan.urlFindings}">
+                        <td><code class="text-info" th:text="${uf.originalUrl}">http://...</code></td>
+                        <td>
+                            <span th:class="${uf.suspicious ? 'badge-risk-critical' : 'badge-risk-low'}" 
+                                  th:text="${uf.suspicious ? 'SUSPICIOUS' : 'LOW RISK'}">LOW RISK</span>
+                        </td>
+                        <td class="small text-secondary" th:text="${#strings.listJoin(uf.reasons, '; ')}">
+                            Reasons
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Safety Recommendations -->
+    <div class="cyber-card p-4 mb-4">
+        <h5 class="text-white mb-3">
+            <i class="fa-solid fa-list-check text-success me-2"></i> Recommended Safety Actions / பாதுகாப்பு பரிந்துரைகள்
+        </h5>
+        <ul class="list-group list-group-flush cyber-card p-3 small text-secondary lang-en" id="reportRecsEn">
+            <li th:each="rec : ${scan.recommendations}" class="list-group-item bg-transparent text-secondary border-0 ps-0 pb-2">
+                <i class="fa-solid fa-shield-halved text-info me-2"></i> <span th:text="${rec}">Recommendation text</span>
+            </li>
+        </ul>
+        <ul class="list-group list-group-flush cyber-card p-3 small text-secondary lang-ta d-none" id="reportRecsTa">
+            <li th:each="recTa : ${scan.recommendationsTa != null and !scan.recommendationsTa.isEmpty() ? scan.recommendationsTa : scan.recommendations}" class="list-group-item bg-transparent text-secondary border-0 ps-0 pb-2">
+                <i class="fa-solid fa-shield-halved text-info me-2"></i> <span th:text="${recTa}">Recommendation text</span>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Heuristic Disclaimer -->
+    <div class="alert alert-dark border border-secondary small text-muted">
+        <i class="fa-solid fa-circle-info me-1 text-info"></i>
+        <strong>Heuristic Disclaimer:</strong> The ScamLens risk score is an automated algorithmic heuristic designed to evaluate threat patterns. It does not constitute a mathematical guarantee or legal determination. Never share sensitive banking credentials or passwords regardless of score.
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/main.js}"></script>
+<script th:inline="javascript">
+    function switchReportLang(lang) {
+        const btnEn = document.getElementById('btnReportEn');
+        const btnTa = document.getElementById('btnReportTa');
+        const catEn = document.getElementById('reportCategoryEn');
+        const catTa = document.getElementById('reportCategoryTa');
+        const recsEn = document.getElementById('reportRecsEn');
+        const recsTa = document.getElementById('reportRecsTa');
+
+        if (lang === 'ta') {
+            btnTa.classList.add('active');
+            btnEn.classList.remove('active');
+            if (catEn && catTa) { catEn.classList.add('d-none'); catTa.classList.remove('d-none'); }
+            if (recsEn && recsTa) { recsEn.classList.add('d-none'); recsTa.classList.remove('d-none'); }
+            document.querySelectorAll('.lang-en').forEach(el => el.classList.add('d-none'));
+            document.querySelectorAll('.lang-ta').forEach(el => el.classList.remove('d-none'));
+        } else {
+            btnEn.classList.add('active');
+            btnTa.classList.remove('active');
+            if (catEn && catTa) { catEn.classList.remove('d-none'); catTa.classList.add('d-none'); }
+            if (recsEn && recsTa) { recsEn.classList.remove('d-none'); recsTa.classList.add('d-none'); }
+            document.querySelectorAll('.lang-ta').forEach(el => el.classList.add('d-none'));
+            document.querySelectorAll('.lang-en').forEach(el => el.classList.remove('d-none'));
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        /*[# th:if="${scan.languageCode == 'ta' or (scan.detectedLanguage != null and scan.detectedLanguage.contains('Tamil'))}"]*/
+        switchReportLang('ta');
+        /*[/]*/
+    });
+</script>
+</body>
+</html>

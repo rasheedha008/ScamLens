@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About ScamLens - Platform Architecture & Methodology</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container py-4 my-2">
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 mb-2 rounded-pill" style="background: rgba(0, 240, 255, 0.1); border: 1px solid rgba(0, 240, 255, 0.3);">
+            <i class="fa-solid fa-shield-halved text-info"></i>
+            <span class="small fw-semibold text-info">About the Platform</span>
+        </div>
+        <h2 class="text-white fw-bold mb-2">Architectural Blueprint & Innovations</h2>
+        <p class="lead text-info fw-semibold mb-2">Think Before You Click. Stay Ahead of Scams.</p>
+        <p class="text-secondary" style="max-width: 750px; margin: 0 auto;">
+            ScamLens is a cybersecurity analysis platform designed to address the limitations of conventional phishing scanners through three core innovations built in pure Java Spring Boot.
+        </p>
+    </div>
+
+    <!-- Three Major Innovations Section -->
+    <div class="cyber-card p-4 p-md-5 mb-5" style="border-top: 3px solid var(--accent-cyan);">
+        <div class="text-center mb-4">
+            <span class="badge bg-dark border border-secondary text-info mb-2 text-uppercase">Groundbreaking Architecture</span>
+            <h3 class="text-white fw-bold">Three Major Innovations of ScamLens</h3>
+            <p class="text-secondary small">Engineered to eliminate false alarms and deliver explainable, audit-grade scam analysis.</p>
+        </div>
+
+        <div class="row g-4 mt-2">
+            <!-- Innovation 1 -->
+            <div class="col-lg-4">
+                <div class="p-4 rounded bg-dark border border-secondary h-100">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="p-3 rounded-3" style="background: rgba(0, 240, 255, 0.15); color: var(--accent-cyan); font-size: 1.5rem;">
+                            <i class="fa-solid fa-brain"></i>
+                        </div>
+                        <div>
+                            <span class="badge bg-secondary small">Innovation 1</span>
+                            <h5 class="text-white mb-0">Context-Aware Rule-Based Scam Detection</h5>
+                        </div>
+                    </div>
+                    <ul class="text-secondary small ps-3 mb-0">
+                        <li class="mb-2"><strong>Semantic Intent Analysis:</strong> Analyzes the meaning and intent of messages rather than relying only on suspicious keywords.</li>
+                        <li class="mb-2"><strong>Differentiates Warnings vs Requests:</strong> Distinguishes legitimate institutional security warnings (e.g. <em>"Bank will never ask for OTP"</em>) from actual hostile scam attacks.</li>
+                        <li><strong>Advanced Context Primitives:</strong> Incorporates negation detection, request-intent recognition, and suspicious-action identification.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Innovation 2 -->
+            <div class="col-lg-4">
+                <div class="p-4 rounded bg-dark border border-secondary h-100">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="p-3 rounded-3" style="background: rgba(139, 92, 246, 0.15); color: var(--accent-purple); font-size: 1.5rem;">
+                            <i class="fa-solid fa-scale-balanced"></i>
+                        </div>
+                        <div>
+                            <span class="badge bg-secondary small">Innovation 2</span>
+                            <h5 class="text-white mb-0">Explainable Multi-Indicator Risk Assessment</h5>
+                        </div>
+                    </div>
+                    <ul class="text-secondary small ps-3 mb-0">
+                        <li class="mb-2"><strong>Multi-Indicator Evaluation:</strong> Evaluates multiple suspicious indicators using a weighted risk-scoring mechanism.</li>
+                        <li class="mb-2"><strong>Standardized Risk Scale:</strong> Generates a calibrated risk score strictly between 0 and 100 with category capping.</li>
+                        <li><strong>Transparent Explanations:</strong> Provides full explanations for detected threats, suspicious phrases, and assigned risk levels.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Innovation 3 -->
+            <div class="col-lg-4">
+                <div class="p-4 rounded bg-dark border border-secondary h-100">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="p-3 rounded-3" style="background: rgba(16, 185, 129, 0.15); color: #10b981; font-size: 1.5rem;">
+                            <i class="fa-solid fa-cubes-stacked"></i>
+                        </div>
+                        <div>
+                            <span class="badge bg-secondary small">Innovation 3</span>
+                            <h5 class="text-white mb-0">Integrated User-Centric Cybersecurity Platform</h5>
+                        </div>
+                    </div>
+                    <ul class="text-secondary small ps-3 mb-0">
+                        <li class="mb-2"><strong>Unified Analysis:</strong> Combines message content analysis and suspicious URL analysis in a single application.</li>
+                        <li class="mb-2"><strong>ScamLens Compare:</strong> Provides dual-message comparison to contrast risk profiles and semantic structures side by side.</li>
+                        <li><strong>Personalized Vault & Awareness:</strong> Maintains user scan history, downloadable OpenPDF reports, and a Scam Intelligence Center.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Technology Pillars -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="cyber-card p-4 h-100">
+                <i class="fa-brands fa-java fs-1 text-danger mb-3"></i>
+                <h5 class="text-white">Pure Java Backend</h5>
+                <p class="text-secondary small">
+                    Engineered 100% in Java with Spring Boot 3, Hibernate JPA, and OpenPDF. Zero Python scripts, zero external microservices. High throughput, type-safe reliability.
+                </p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="cyber-card p-4 h-100">
+                <i class="fa-solid fa-shield-virus fs-1 text-info mb-3"></i>
+                <h5 class="text-white">Non-Executing Passive URL Parsing</h5>
+                <p class="text-secondary small">
+                    Inspects link structures safely with <code>java.net.URI</code> and <code>java.net.IDN</code>. Unmasks shorteners, flags Punycode, IP hosts, and deceptive paths without visiting dangerous destinations.
+                </p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="cyber-card p-4 h-100">
+                <i class="fa-solid fa-lock fs-1 text-success mb-3"></i>
+                <h5 class="text-white">User Privacy & Auditing</h5>
+                <p class="text-secondary small">
+                    Protected by Spring Security with BCrypt password hashing. Each user maintains a private scan vault, personal analytics dashboard, and exportable incident records.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Legal & Heuristic Disclaimer -->
+    <div class="alert alert-dark border border-secondary p-4 mb-4">
+        <div class="d-flex align-items-start gap-3">
+            <i class="fa-solid fa-triangle-exclamation text-warning fs-3 mt-1"></i>
+            <div>
+                <h5 class="text-white fw-bold mb-1">Algorithmic Heuristic Notice</h5>
+                <p class="text-secondary small mb-0">
+                    The ScamLens Risk Score (0–100) is a heuristic risk indicator, not a mathematical certainty or legal proof that a communication is fraudulent. A low score does not guarantee absolute safety, and a high score does not prove criminal intent. Users must exercise independent verification and never disclose sensitive authentication credentials over unverified channels.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>

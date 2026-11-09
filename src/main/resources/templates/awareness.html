@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scam Intelligence Center - ScamLens</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="container py-4 my-2">
+    <!-- Header -->
+    <div class="text-center mb-5">
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 mb-2 rounded-pill" style="background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.3);">
+            <i class="fa-solid fa-graduation-cap text-purple" style="color: var(--accent-purple);"></i>
+            <span class="small fw-semibold text-purple" style="color: #c4b5fd;">Cybersecurity Awareness & Threat Education</span>
+        </div>
+        <h2 class="text-white fw-bold mb-2">Scam Intelligence Center</h2>
+        <p class="text-secondary" style="max-width: 700px; margin: 0 auto;">
+            Empowering individuals with beginner-friendly explanations, warning signs, realistic threat scenarios, and defensive cybersecurity protocols across 10 vital topics.
+        </p>
+    </div>
+
+    <!-- Quick Navigation Pills -->
+    <div class="d-flex flex-wrap justify-content-center gap-2 mb-5">
+        <a th:each="topic : ${topics}" th:href="'#' + ${topic.id}" class="btn btn-sm btn-cyber-outline">
+            <span th:text="${topic.number} + '. ' + ${topic.title}">Topic</span>
+        </a>
+    </div>
+
+    <!-- 10 Detailed Educational Topic Modules -->
+    <div class="row g-4">
+        <div th:each="topic : ${topics}" class="col-12" th:id="${topic.id}">
+            <div class="cyber-card p-4 p-md-5">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3 border-bottom border-secondary pb-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="p-3 rounded-3" style="background: rgba(0, 240, 255, 0.1); color: var(--accent-cyan); font-size: 1.5rem;">
+                            <i th:class="${topic.icon}"></i>
+                        </div>
+                        <div>
+                            <span class="badge bg-dark border border-secondary text-info mb-1" th:text="'Topic ' + ${topic.number} + ' of 10'">Topic 1</span>
+                            <h3 class="text-white fw-bold mb-0" th:text="${topic.title}">Topic Title</h3>
+                        </div>
+                    </div>
+                    <a th:href="@{/scanner}" class="btn btn-sm btn-cyber">
+                        <i class="fa-solid fa-crosshairs me-1"></i> Scan Message for This Threat
+                    </a>
+                </div>
+
+                <!-- Summary & Full Explanation -->
+                <p class="lead text-info fw-semibold mb-2" th:text="${topic.summary}">Topic summary paragraph...</p>
+                <p class="text-secondary mb-4" th:text="${topic.fullExplanation}">Full detailed educational explanation...</p>
+
+                <div class="row g-4">
+                    <!-- Warning Signs Checklist -->
+                    <div class="col-lg-6">
+                        <div class="p-3 rounded bg-dark border border-secondary h-100">
+                            <h6 class="text-warning fw-bold mb-3">
+                                <i class="fa-solid fa-triangle-exclamation me-2"></i> Key Warning Signs
+                            </h6>
+                            <ul class="list-unstyled mb-0">
+                                <li th:each="sign : ${topic.warningSigns}" class="d-flex align-items-start gap-2 mb-2 small text-secondary">
+                                    <i class="fa-solid fa-circle-xmark text-danger mt-1"></i>
+                                    <span th:text="${sign}">Warning sign text</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Realistic Threat Example (Clearly labeled educational simulation) -->
+                    <div class="col-lg-6">
+                        <div class="p-3 rounded bg-dark border border-secondary h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="text-danger fw-bold mb-0">
+                                    <i class="fa-solid fa-bug me-2"></i> Anatomy of an Attack (Example)
+                                </h6>
+                                <span class="badge bg-dark text-muted border border-secondary" style="font-size: 0.65rem;">EDUCATIONAL SAMPLE</span>
+                            </div>
+                            <div class="p-3 rounded font-monospace small text-white mb-2" style="background: rgba(239, 68, 68, 0.1); border-left: 3px solid var(--risk-critical);" th:text="${topic.realisticExample}">
+                                Example text...
+                            </div>
+                            <small class="text-muted d-block" style="font-size: 0.75rem;">
+                                Note: This simulated text illustrates deceptive social engineering techniques. Never engage with real messages mirroring this structure.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recommended Safety Protocols -->
+                <div class="mt-4 pt-3 border-top border-secondary">
+                    <h6 class="text-success fw-bold mb-3">
+                        <i class="fa-solid fa-shield-check me-2"></i> Defensive Safety Protocols
+                    </h6>
+                    <div class="row g-2">
+                        <div th:each="protocol : ${topic.safetyProtocols}" class="col-md-4">
+                            <div class="p-2 rounded bg-dark border border-secondary small text-secondary h-100 d-flex align-items-center gap-2">
+                                <i class="fa-solid fa-check text-success"></i>
+                                <span th:text="${protocol}">Protocol action</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/main.js}"></script>
+</body>
+</html>
